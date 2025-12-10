@@ -62,9 +62,10 @@ class RepairRequest(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     photo_url: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    required_time: Mapped[dt.datetime] = mapped_column(DateTime, nullable=True)
+    required_time: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[RequestStatus] = mapped_column(
-        SQLEnum(RequestStatus), default=RequestStatus.NEW.value
+        SQLEnum(RequestStatus, name="request_status"),
+        default=RequestStatus.NEW.value
     )
 
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())

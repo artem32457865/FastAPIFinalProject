@@ -2,7 +2,6 @@ import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.exceptions import RequestValidationError, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -10,15 +9,15 @@ from routes import auth_router, frontend_router, user_account_router
 
 app = FastAPI()
 
-#app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Импортируем шаблоны
 templates = Jinja2Templates(directory="templates")
 
 # Подключение роутеров
+app.include_router(frontend_router, prefix="", tags=["frontend"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(user_account_router, prefix="/account", tags=["account"])
-app.include_router(frontend_router, prefix="", tags=["frontend"])
 
 
 # Глобальный обработчик ошибок 404
