@@ -21,6 +21,8 @@ class DatabaseConfig:
     ACCESS_TOKEN_EXPIRE_MINUTES = 5
     SECRET_KEY = os.getenv("SECRET_KEY")
 
+    STATIC_IMAGES_DIR = "static/images"
+
     def uri_postgres(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@localhost:5432/{self.DATABASE_NAME}"
 
@@ -46,7 +48,7 @@ async_engine: AsyncEngine = create_async_engine(api_config.uri_postgres(), echo=
 async_session = async_sessionmaker(bind=async_engine)
 
 
-# Декларація базового класу для моделей, Необхідно для реалізації відношень у ORM
+# Декларація базового класу для моделей, Необхідно для реалізації відношень в ORM
 class Base(AsyncAttrs, DeclarativeBase):
     pass
 

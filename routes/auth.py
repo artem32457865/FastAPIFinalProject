@@ -33,6 +33,8 @@ def require_admin(user: dict = Depends(get_current_user)):
     return user
 
 
+# ==================== AUTH ROUTES ====================
+
 @router.post("/token")
 async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await authenticate_user(form_data.username, form_data.password)
