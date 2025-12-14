@@ -17,9 +17,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Подключение роутеров
-app.include_router(frontend_router, prefix="", tags=["frontend"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(user_account_router, prefix="/account", tags=["account"])
+app.include_router(frontend_router, prefix="", tags=["frontend"])
 
 
 # Глобальный обработчик ошибок 404
@@ -99,29 +99,28 @@ async def forbidden_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-# Тестовый роут для проверки ошибки 500
-@app.get("/test-error-500")
-async def test_error_500():
-    raise Exception("Тестова помилка сервера")
-
-
-# Тестовый роут для проверки ошибки 404
-@app.get("/test-error-404")
-async def test_error_404():
-    raise HTTPException(status_code=404, detail="Тестова сторінка не знайдена")
-
-
-# Тестовый роут для проверки ошибки 401
-@app.get("/test-error-401")
-async def test_error_401():
-    raise HTTPException(status_code=401, detail="Тестова помилка авторизації")
-
-
-# Тестовый роут для проверки ошибки 403
-@app.get("/test-error-403")
-async def test_error_403():
-    raise HTTPException(status_code=403, detail="Тестова помилка доступу")
-
+# # Тестовый роут для проверки ошибки 500
+# @app.get("/test-error-500")
+# async def test_error_500():
+#     raise Exception("Тестова помилка сервера")
+#
+#
+# # Тестовый роут для проверки ошибки 404
+# @app.get("/test-error-404")
+# async def test_error_404():
+#     raise HTTPException(status_code=404, detail="Тестова сторінка не знайдена")
+#
+#
+# # Тестовый роут для проверки ошибки 401
+# @app.get("/test-error-401")
+# async def test_error_401():
+#     raise HTTPException(status_code=401, detail="Тестова помилка авторизації")
+#
+#
+# # Тестовый роут для проверки ошибки 403
+# @app.get("/test-error-403")
+# async def test_error_403():
+#     raise HTTPException(status_code=403, detail="Тестова помилка доступу")
 
 # Основной роут для проверки работоспособности
 @app.get("/health")
