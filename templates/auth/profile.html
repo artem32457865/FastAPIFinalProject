@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій профіль - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">RepairHub</a>
+            <a href="/" class="btn btn-outline-secondary">На головну</a>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <h1>Мій профіль</h1>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">Інформація про користувача</h5>
+                <p><strong>Ім'я:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Статус:</strong> {% if user.is_admin %}Адміністратор{% else %}Користувач{% endif %}</p>
+                <a href="/auth/logout" class="btn btn-danger">Вийти</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

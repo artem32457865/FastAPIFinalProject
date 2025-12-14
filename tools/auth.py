@@ -2,7 +2,9 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models.models import User
@@ -23,7 +25,6 @@ def create_access_token(payload: dict, expires_delta: timedelta | None = None):
         )
 
     payload.update({"exp": expire})
-    print(payload)
     jwt_token = jwt.encode(
         payload, api_config.SECRET_KEY, algorithm=api_config.ALGORITHM
     )
@@ -35,26 +36,34 @@ def decode_access_token(token: str):
         payload = jwt.decode(
             token,
             api_config.SECRET_KEY,
-            algorithms=[api_config.ALGORITHM],
-            options={"verify_exp": False},
+            algorithms=[api_config.ALGORITHM]
         )
         return payload
     except jwt.ExpiredSignatureError:
-        print({"error": "Token has expired"})
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Токен закінчився",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except jwt.InvalidTokenError as e:
-        print({"error": f"Invalid token: {e}"})
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Недійсний токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def authenticate_user(username: str, password: str):
     async with async_session() as session:
-        user_stmt = select(User).where(User.username == username)
-        user = await session.execute(user_stmt)
-        user = user.scalar_one_or_none()
+        # Шукаємо користувача за username або email
+        stmt = select(User).where(
+            (User.username == username) | (User.email == username)
+        )
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
 
         if not user:
-            return False
+            return None
         if not check_password_hash(user.password, password):
-            return False
+            return None
         return user

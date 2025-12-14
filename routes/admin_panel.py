@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User
-from routes.auth import get_current_user, require_admin
+from routes.auth import require_admin
+from settings import get_db
 
 router = APIRouter()
 
@@ -14,5 +15,6 @@ e) Створення повідомлень (коментарів)(/admin/repai
 
 
 @router.get("/user/admin/me")
-async def only_for_admin(current_user: User = Depends(require_admin)):
+async def only_for_admin(request: Request, db: AsyncSession = Depends(get_db)):
+    current_user = await require_admin(request, db)
     return {"is admin": current_user}

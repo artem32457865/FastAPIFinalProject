@@ -2,7 +2,7 @@ import asyncio
 
 from werkzeug.security import generate_password_hash
 
-from models import User
+from models import User, Product, ProductCategory
 from settings import Base, api_config, async_engine, async_session
 
 
@@ -42,3 +42,62 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+async def insert_data():
+    async with async_session() as session:
+        # Користувачі
+        u1 = User(...)
+        u2 = User(...)
+        
+        # Товари
+        products = [
+            Product(
+                name="Пилосос Dyson V11",
+                description="Потужний бездротовий пилосос",
+                price=19999.99,
+                category=ProductCategory.VACUUM_CLEANER.value,
+                stock_quantity=10
+            ),
+            Product(
+                name="Холодильник Samsung RB38",
+                description="Двохкамерний холодильник з No Frost",
+                price=25999.99,
+                category=ProductCategory.REFRIGERATOR.value,
+                stock_quantity=5
+            ),
+            # Додайте більше товарів
+        ]
+        
+        session.add_all([u1, u2] + products)
+        await session.commit()
+
+        
+
+async def insert_data():
+    async with async_session() as session:
+        # Користувачі
+        u1 = User(...)
+        u2 = User(...)
+        
+        # Товари
+        products = [
+            Product(
+                name="Пилосос Dyson V11",
+                description="Потужний бездротовий пилосос",
+                price=19999.99,
+                category=ProductCategory.VACUUM_CLEANER.value,
+                stock_quantity=10
+            ),
+            Product(
+                name="Холодильник Samsung RB38",
+                description="Двохкамерний холодильник з No Frost",
+                price=25999.99,
+                category=ProductCategory.REFRIGERATOR.value,
+                stock_quantity=5
+            ),
+            # Додайте більше товарів
+        ]
+        
+        session.add_all([u1, u2] + products)
+        await session.commit()

@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from routes import auth_router, frontend_router, user_account_router
+from routes.products import router as products_router
+
 
 app = FastAPI()
 

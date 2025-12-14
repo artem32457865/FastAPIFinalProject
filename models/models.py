@@ -137,3 +137,32 @@ class Rewiews(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())
+
+
+class ProductCategory(str, Enum):
+    VACUUM_CLEANER = "Пилососи"
+    REFRIGERATOR = "Холодильники"
+    COMPUTER = "Комп'ютери"
+    TV = "Телевізори"
+    SMARTPHONE = "Смартфони"
+    KITCHEN = "Кухонна техніка"
+    OTHER = "Інше"
+
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    price: Mapped[float] = mapped_column(nullable=False)
+    category: Mapped[ProductCategory] = mapped_column(
+        SQLEnum(ProductCategory, name="product_category"),
+        default=ProductCategory.OTHER.value
+    )
+    image_url: Mapped[str] = mapped_column(String(255), nullable=True)
+    stock_quantity: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())
+
+    def __str__(self):
+        return f"<Product> {self.name} - {self.price} грн"

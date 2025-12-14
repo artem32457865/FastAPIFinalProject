@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Увійти - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .auth-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .auth-footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Проста навігація -->
+    <nav class="navbar navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
+                     style="width:40px;height:40px;font-weight:700;">
+                    R
+                </div>
+                <div>
+                    <div class="fw-bold">RepairHub</div>
+                    <div class="text-muted small">Ремонт та продаж техніки</div>
+                </div>
+            </a>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> На головну
+            </a>
+        </div>
+    </nav>
+
+    <div class="container auth-container">
+        <div class="auth-card card">
+            <div class="auth-header">
+                <h2 class="mb-1">Увійти в акаунт</h2>
+                <p class="mb-0 opacity-75">Ласкаво просимо назад!</p>
+            </div>
+            
+            <div class="card-body p-4">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i> {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="/auth/login">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person me-1"></i> Ім'я користувача або Email
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               required
+                               placeholder="Введіть ваше ім'я або email">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock me-1"></i> Пароль
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required
+                               placeholder="Введіть ваш пароль">
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Запам'ятати мене</label>
+                        </div>
+                        <a href="#" class="text-decoration-none small">Забули пароль?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
+                    </button>
+                    
+                    <div class="text-center mb-3">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <hr class="flex-grow-1">
+                            <span class="mx-3 text-muted">або</span>
+                            <hr class="flex-grow-1">
+                        </div>
+                    </div>
+                    
+                    <a href="/auth/register" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-person-plus me-2"></i> Створити новий акаунт
+                    </a>
+                </form>
+            </div>
+            
+            <div class="auth-footer">
+                <p class="mb-0 text-muted small">
+                    Увійшовши, ви погоджуєтесь з нашими 
+                    <a href="#" class="text-decoration-none">Умовами використання</a> 
+                    та 
+                    <a href="#" class="text-decoration-none">Політикою конфіденційності</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Простий підвал -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="mb-2">
+                <a href="/" class="text-white text-decoration-none me-3">Головна</a>
+                <a href="/products" class="text-white text-decoration-none me-3">Магазин</a>
+                <a href="/auth/register" class="text-white text-decoration-none me-3">Реєстрація</a>
+                <a href="#" class="text-white text-decoration-none">Допомога</a>
+            </div>
+            <div class="text-muted small">
+                © {{ now.year if now else 2024 }} RepairHub • Навчальний проєкт
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Автоматична вставка поточного року
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearElement = document.querySelector('footer .text-muted');
+            if (yearElement && yearElement.textContent.includes('{{ now.year if now else 2024 }}')) {
+                const currentYear = new Date().getFullYear();
+                yearElement.innerHTML = yearElement.innerHTML.replace('{{ now.year if now else 2024 }}', currentYear);
+            }
+            
+            // Перевірка чи користувач вже авторизований
+            const accessToken = document.cookie.split('; ').find(row => row.startsWith('access_token='));
+            if (accessToken && window.location.pathname === '/auth/login') {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
