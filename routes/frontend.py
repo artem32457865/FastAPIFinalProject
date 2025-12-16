@@ -48,3 +48,11 @@ async def catch_all(request: Request, full_path: str, db: AsyncSession = Depends
         },
         status_code=404
     )
+
+
+@router.get("/repairs", response_class=HTMLResponse)
+async def repairs_page(request: Request):
+    return templates.TemplateResponse(
+        "repairs/catalog.html",
+        {"request": request}
+    )

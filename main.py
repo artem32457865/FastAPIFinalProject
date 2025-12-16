@@ -6,8 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from routes import auth_router, frontend_router, user_account_router
-from routes.products import router as products_router
-
+from routes.products import router as products_router 
 
 app = FastAPI()
 
@@ -19,9 +18,8 @@ templates = Jinja2Templates(directory="templates")
 # Подключение роутеров
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(user_account_router, prefix="/account", tags=["account"])
-app.include_router(frontend_router, prefix="", tags=["frontend"])
-
-
+app.include_router(products_router, prefix="", tags=["products"]) 
+app.include_router(frontend_router, prefix="", tags=["frontend"])  
 # Глобальный обработчик ошибок 404
 @app.exception_handler(404)
 async def not_found_exception_handler(request: Request, exc: HTTPException):

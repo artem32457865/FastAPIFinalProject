@@ -1,464 +1,585 @@
 <!DOCTYPE html>
 <html lang="uk">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RepairHub — Головна</title>
-  
-  <!-- Bootstrap 5 CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .hero-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 5rem 0;
-      margin-bottom: 3rem;
-    }
-    .category-card {
-      transition: transform 0.3s;
-      height: 100%;
-    }
-    .category-card:hover {
-      transform: translateY(-10px);
-    }
-    .icon-container {
-      width: 70px;
-      height: 70px;
-      background: #f8f9fa;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-    }
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #667eea;
-    }
-    .product-card {
-      border: 1px solid #e9ecef;
-      border-radius: 10px;
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-    .product-card:hover {
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .product-img {
-      height: 200px;
-      object-fit: cover;
-      width: 100%;
-    }
-  </style>
-</head>
-<body class="bg-light">
-  <!-- Навігаційне меню -->
-  <nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom shadow-sm">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RepairHub — Головна</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5rem 0;
+        margin-bottom: 3rem;
+      }
+      .category-card {
+        transition: transform 0.3s;
+        height: 100%;
+      }
+      .category-card:hover {
+        transform: translateY(-10px);
+      }
+      .icon-container {
+        width: 70px;
+        height: 70px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+      }
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+      }
+      .product-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s;
+      }
+      .product-card:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      .product-img {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <!-- Навігаційне меню -->
+<nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom shadow-sm">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-        <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
-             style="width:44px;height:44px;font-weight:700;">
-          R
-        </div>
-        <div>
-          <div class="fw-bold fs-4">RepairHub</div>
-          <div class="text-muted small">Ремонт та продаж техніки</div>
-        </div>
-      </a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
+                 style="width:44px;height:44px;font-weight:700;">
+                R
+            </div>
+            <div>
+                <div class="fw-bold fs-4">RepairHub</div>
+                <div class="text-muted small">Ремонт та продаж техніки</div>
+            </div>
+        </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
-              aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav ms-auto align-items-lg-center">
-          <li class="nav-item"><a class="nav-link active fw-medium" href="/">Головна</a></li>
-          <li class="nav-item"><a class="nav-link" href="/products">Магазин</a></li>
-          <li class="nav-item"><a class="nav-link" href="/products?category=Пилососи">Пилососи</a></li>
-          <li class="nav-item"><a class="nav-link" href="/products?category=Холодильники">Холодильники</a></li>
-          <li class="nav-item"><a class="nav-link" href="/products?category=Комп'ютери">Комп'ютери</a></li>
-          
-          {% if is_authenticated %}
-            {% if current_user and current_user.is_admin %}
-              <li class="nav-item"><a class="nav-link text-danger" href="/admin">Адмін-панель</a></li>
-            {% endif %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ current_user.username if current_user else 'Акаунт' }}
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/account/user/me">Мій профіль</a></li>
-                <li><a class="dropdown-item" href="/account/repairs">Мої заявки</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/auth/logout">Вийти</a></li>
-              </ul>
-            </li>
-          {% else %}
-            <li class="nav-item"><a class="nav-link" href="/auth/login">Увійти</a></li>
-            <li class="nav-item"><a class="btn btn-primary ms-lg-2" href="/auth/register">Реєстрація</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Герой секція -->
-  <div class="hero-section">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-6">
-          <h1 class="display-4 fw-bold mb-4">Ремонт техніки з гарантією</h1>
-          <p class="lead mb-4">Швидкий якісний ремонт побутової техніки та широкий вибір нової техніки в нашому магазині.</p>
-          <div class="d-flex flex-wrap gap-3">
-            <a href="/products" class="btn btn-light btn-lg px-4">Перейти до магазину</a>
-            {% if is_authenticated %}
-              <a href="/account/repair/add" class="btn btn-outline-light btn-lg px-4">Створити заявку</a>
+        <div class="ms-auto d-flex gap-3 align-items-center">
+            <a href="/" class="nav-link">Головна</a>
+            <a href="/products" class="nav-link">Магазин</a>
+            
+            {% if current_user %}
+                <a href="/account/dashboard" class="btn btn-outline-primary">Кабінет</a>
+                <a href="/auth/logout" class="btn btn-outline-secondary">Вийти</a>
             {% else %}
-              <a href="/auth/register" class="btn btn-outline-light btn-lg px-4">Зареєструватися</a>
+                <a href="/auth/login" class="btn btn-outline-secondary">Увійти</a>
+                <a href="/auth/register" class="btn btn-primary">Реєстрація</a>
             {% endif %}
-          </div>
         </div>
-        <div class="col-lg-6 d-none d-lg-block">
-          <div class="text-center">
-            <div class="bg-white rounded p-4 d-inline-block shadow">
-              <div class="fs-1">⚙️</div>
-              <div class="mt-2 text-dark fw-medium">Швидкий ремонт</div>
+    </div>
+</nav>
+    <!-- Герой секція -->
+    <div class="hero-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Ремонт техніки з гарантією</h1>
+            <p class="lead mb-4">
+              Швидкий якісний ремонт побутової техніки та широкий вибір нової
+              техніки в нашому магазині.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="/products" class="btn btn-light btn-lg px-4"
+                >Перейти до магазину</a
+              >
+              {% if is_authenticated %}
+              <a
+                href="/account/repair/add"
+                class="btn btn-outline-light btn-lg px-4"
+                >Створити заявку</a
+              >
+              {% else %}
+              <a href="/auth/register" class="btn btn-outline-light btn-lg px-4"
+                >Зареєструватися</a
+              >
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-lg-6 d-none d-lg-block">
+            <div class="text-center">
+              <div class="bg-white rounded p-4 d-inline-block shadow">
+                <div class="fs-1">⚙️</div>
+                <div class="mt-2 text-dark fw-medium">Швидкий ремонт</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <main class="container my-5">
-    {% if error %}
+    <main class="container my-5">
+      {% if error %}
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ error }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
       </div>
-    {% endif %}
+      {% endif %}
 
-    <!-- Статистика -->
-    <div class="row text-center mb-5">
-      <div class="col-md-3 mb-4">
-        <div class="stat-number">1000+</div>
-        <div class="text-muted">Відремонтованих пристроїв</div>
+      <!-- Статистика -->
+      <div class="row text-center mb-5">
+        <div class="col-md-3 mb-4">
+          <div class="stat-number">1000+</div>
+          <div class="text-muted">Відремонтованих пристроїв</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-number">500+</div>
+          <div class="text-muted">Товарів в магазині</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-number">50+</div>
+          <div class="text-muted">Кваліфікованих майстрів</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-number">24/7</div>
+          <div class="text-muted">Підтримка клієнтів</div>
+        </div>
       </div>
-      <div class="col-md-3 mb-4">
-        <div class="stat-number">500+</div>
-        <div class="text-muted">Товарів в магазині</div>
-      </div>
-      <div class="col-md-3 mb-4">
-        <div class="stat-number">50+</div>
-        <div class="text-muted">Кваліфікованих майстрів</div>
-      </div>
-      <div class="col-md-3 mb-4">
-        <div class="stat-number">24/7</div>
-        <div class="text-muted">Підтримка клієнтів</div>
-      </div>
-    </div>
 
-    <!-- Категорії товарів -->
-    <section class="mb-5">
-      <h2 class="text-center mb-4">Популярні категорії</h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <a href="/products?category=Пилососи" class="text-decoration-none">
-            <div class="card category-card border-0 shadow-sm h-100">
-              <div class="card-body text-center p-4">
-                <div class="icon-container">
-                  <span class="fs-3">🧹</span>
+      <!-- Категорії товарів -->
+      <section class="mb-5">
+        <h2 class="text-center mb-4">Популярні категорії</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <a href="/products?category=Пилососи" class="text-decoration-none">
+              <div class="card category-card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                  <div class="icon-container">
+                    <span class="fs-3">🧹</span>
+                  </div>
+                  <h5 class="card-title">Пилососи</h5>
+                  <p class="card-text text-muted">
+                    Від традиційних до роботів-пилососів
+                  </p>
+                  <span class="badge bg-primary">Від 2 999 грн</span>
                 </div>
-                <h5 class="card-title">Пилососи</h5>
-                <p class="card-text text-muted">Від традиційних до роботів-пилососів</p>
-                <span class="badge bg-primary">Від 2 999 грн</span>
               </div>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a
+              href="/products?category=Холодильники"
+              class="text-decoration-none"
+            >
+              <div class="card category-card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                  <div class="icon-container">
+                    <span class="fs-3">❄️</span>
+                  </div>
+                  <h5 class="card-title">Холодильники</h5>
+                  <p class="card-text text-muted">
+                    Однокамерні, двохкамерні, Side-by-Side
+                  </p>
+                  <span class="badge bg-primary">Від 8 999 грн</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a
+              href="/products?category=Комп'ютери"
+              class="text-decoration-none"
+            >
+              <div class="card category-card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                  <div class="icon-container">
+                    <span class="fs-3">💻</span>
+                  </div>
+                  <h5 class="card-title">Комп'ютери</h5>
+                  <p class="card-text text-muted">
+                    Ноутбуки, ПК, монітори та комплектуючі
+                  </p>
+                  <span class="badge bg-primary">Від 12 999 грн</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Популярні товари -->
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2>Популярні товари</h2>
+          <a href="/products" class="btn btn-outline-primary"
+            >Переглянути всі</a
+          >
+        </div>
+        <div class="row g-4">
+          {% for product in popular_products or [] %}
+          <div class="col-md-3">
+            <div class="card product-card h-100">
+              {% if product.image_url %}
+              <img
+                src="{{ product.image_url }}"
+                class="product-img"
+                alt="{{ product.name }}"
+              />
+              {% else %}
+              <div
+                class="product-img bg-secondary d-flex align-items-center justify-content-center"
+              >
+                <span class="text-white">Немає фото</span>
+              </div>
+              {% endif %}
+              <div class="card-body d-flex flex-column">
+                <span class="badge bg-info mb-2">{{ product.category }}</span>
+                <h6 class="card-title">
+                  {{ product.name[:50] }}{% if product.name|length > 50 %}...{%
+                  endif %}
+                </h6>
+                <div class="mt-auto">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <span class="fw-bold text-success"
+                      >{{ product.price }} грн</span
+                    >
+                    {% if product.stock_quantity > 0 %}
+                    <span class="badge bg-success">В наявності</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Під замовлення</span>
+                    {% endif %}
+                  </div>
+                  <a
+                    href="/product/{{ product.id }}"
+                    class="btn btn-primary w-100 mt-2"
+                    >Детальніше</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="col-12">
+            <div class="alert alert-info text-center">
+              <p class="mb-0">
+                Товари ще не додані.
+                <a href="/admin" class="alert-link"
+                  >Додайте товари через адмін-панель</a
+                >
+              </p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Як це працює -->
+      <section class="mb-5">
+        <h2 class="text-center mb-4">Як це працює</h2>
+        <div class="row g-4">
+          <div class="col-md-3">
+            <div class="text-center">
+              <div
+                class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px"
+              >
+                <span class="fs-4">1</span>
+              </div>
+              <h5>Вибір товару або заявка</h5>
+              <p class="text-muted">
+                Оберіть товар в магазині або створіть заявку на ремонт
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-center">
+              <div
+                class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px"
+              >
+                <span class="fs-4">2</span>
+              </div>
+              <h5>Оформлення</h5>
+              <p class="text-muted">
+                Заповніть необхідну інформацію та підтвердіть замовлення
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-center">
+              <div
+                class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px"
+              >
+                <span class="fs-4">3</span>
+              </div>
+              <h5>Обробка</h5>
+              <p class="text-muted">Наші спеціалісти обробляють ваш запит</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-center">
+              <div
+                class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px"
+              >
+                <span class="fs-4">4</span>
+              </div>
+              <h5>Завершення</h5>
+              <p class="text-muted">
+                Отримайте товар або відремонтований пристрій
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Переваги -->
+      <section class="bg-white rounded p-5 shadow-sm mb-5">
+        <h2 class="text-center mb-4">Чому обирають нас</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="d-flex gap-3">
+              <div class="text-primary fs-3">✓</div>
+              <div>
+                <h5>Гарантія якості</h5>
+                <p class="text-muted mb-0">
+                  На всі послуги та товари надається гарантія
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex gap-3">
+              <div class="text-primary fs-3">⚡</div>
+              <div>
+                <h5>Швидке обслуговування</h5>
+                <p class="text-muted mb-0">
+                  Середній час обробки заявки - 24 години
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex gap-3">
+              <div class="text-primary fs-3">👨‍🔧</div>
+              <div>
+                <h5>Кваліфіковані майстри</h5>
+                <p class="text-muted mb-0">
+                  Усі майстри мають сертифікати та досвід
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Корисні посилання -->
+      <section class="mb-5">
+        <h5 class="mb-3">Корисні посилання</h5>
+        <div class="d-flex flex-wrap gap-3">
+          <a
+            class="card text-decoration-none text-dark flex-fill"
+            style="min-width: 200px"
+            href="/faq"
+          >
+            <div class="card-body">
+              <h6 class="card-title mb-1">Часті питання</h6>
+              <p class="card-text text-muted small mb-0">
+                Відповіді на популярні питання
+              </p>
+            </div>
+          </a>
+
+          <a
+            class="card text-decoration-none text-dark flex-fill"
+            style="min-width: 200px"
+            href="/account/repair/add"
+          >
+            <div class="card-body">
+              <h6 class="card-title mb-1">Створити заявку</h6>
+              <p class="card-text text-muted small mb-0">
+                Подати заявку на ремонт техніки
+              </p>
+            </div>
+          </a>
+
+          <a
+            class="card text-decoration-none text-dark flex-fill"
+            style="min-width: 200px"
+            href="/account/repairs"
+          >
+            <div class="card-body">
+              <h6 class="card-title mb-1">Мої заявки</h6>
+              <p class="card-text text-muted small mb-0">
+                Перегляд статусу ваших заявок
+              </p>
             </div>
           </a>
         </div>
-        <div class="col-md-4">
-          <a href="/products?category=Холодильники" class="text-decoration-none">
-            <div class="card category-card border-0 shadow-sm h-100">
-              <div class="card-body text-center p-4">
-                <div class="icon-container">
-                  <span class="fs-3">❄️</span>
-                </div>
-                <h5 class="card-title">Холодильники</h5>
-                <p class="card-text text-muted">Однокамерні, двохкамерні, Side-by-Side</p>
-                <span class="badge bg-primary">Від 8 999 грн</span>
+      </section>
+    </main>
+
+    <!-- Підвал -->
+    <footer class="bg-dark text-white py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div
+                class="rounded bg-white text-primary d-flex align-items-center justify-content-center"
+                style="width: 40px; height: 40px; font-weight: 700"
+              >
+                R
+              </div>
+              <div>
+                <div class="fw-bold fs-5">RepairHub</div>
+                <div class="text-muted">Ремонт та продаж техніки</div>
               </div>
             </div>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a href="/products?category=Комп'ютери" class="text-decoration-none">
-            <div class="card category-card border-0 shadow-sm h-100">
-              <div class="card-body text-center p-4">
-                <div class="icon-container">
-                  <span class="fs-3">💻</span>
-                </div>
-                <h5 class="card-title">Комп'ютери</h5>
-                <p class="card-text text-muted">Ноутбуки, ПК, монітори та комплектуючі</p>
-                <span class="badge bg-primary">Від 12 999 грн</span>
-              </div>
+            <p class="text-muted">
+              Якісний ремонт техніки та широкий вибір нової побутової техніки.
+            </p>
+          </div>
+
+          <div class="col-lg-2 col-md-4 mb-4">
+            <h5>Магазин</h5>
+            <ul class="list-unstyled">
+              <li>
+                <a href="/products" class="text-muted text-decoration-none"
+                  >Всі товари</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/products?category=Пилососи"
+                  class="text-muted text-decoration-none"
+                  >Пилососи</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/products?category=Холодильники"
+                  class="text-muted text-decoration-none"
+                  >Холодильники</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/products?category=Комп'ютери"
+                  class="text-muted text-decoration-none"
+                  >Комп'ютери</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 col-md-4 mb-4">
+            <h5>Клієнтам</h5>
+            <ul class="list-unstyled">
+              <li>
+                <a
+                  href="/account/repair/add"
+                  class="text-muted text-decoration-none"
+                  >Створити заявку</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/account/repairs"
+                  class="text-muted text-decoration-none"
+                  >Мої заявки</a
+                >
+              </li>
+              <li>
+                <a href="/faq" class="text-muted text-decoration-none">FAQ</a>
+              </li>
+              <li>
+                <a href="/auth/login" class="text-muted text-decoration-none"
+                  >Особистий кабінет</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 col-md-4 mb-4">
+            <h5>Контакти</h5>
+            <ul class="list-unstyled">
+              <li class="text-muted">м. Київ, вул. Технічна, 123</li>
+              <li class="text-muted">+380 (44) 123-45-67</li>
+              <li class="text-muted">info@repairhub.ua</li>
+              <li class="text-muted">Пн-Пт: 9:00-18:00</li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 mb-4">
+            <h5>Соціальні мережі</h5>
+            <div class="d-flex gap-3">
+              <a href="#" class="text-white fs-5">📘</a>
+              <a href="#" class="text-white fs-5">📷</a>
+              <a href="#" class="text-white fs-5">📹</a>
+              <a href="#" class="text-white fs-5">💬</a>
             </div>
-          </a>
+          </div>
+        </div>
+
+        <hr class="text-muted my-4" />
+
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between align-items-center"
+        >
+          <div class="mb-3 mb-md-0">
+            <span class="text-muted"
+              >© {{ now.year if now else 2024 }} RepairHub</span
+            >
+            <span class="text-muted mx-2">•</span>
+            <a href="#" class="text-muted text-decoration-none"
+              >Політика конфіденційності</a
+            >
+          </div>
+          <div class="text-muted">Навчальний проєкт • Версія MVP</div>
         </div>
       </div>
-    </section>
+    </footer>
 
-    <!-- Популярні товари -->
-    <section class="mb-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Популярні товари</h2>
-        <a href="/products" class="btn btn-outline-primary">Переглянути всі</a>
-      </div>
-      <div class="row g-4">
-        {% for product in popular_products or [] %}
-        <div class="col-md-3">
-          <div class="card product-card h-100">
-            {% if product.image_url %}
-            <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
-            {% else %}
-            <div class="product-img bg-secondary d-flex align-items-center justify-content-center">
-              <span class="text-white">Немає фото</span>
-            </div>
-            {% endif %}
-            <div class="card-body d-flex flex-column">
-              <span class="badge bg-info mb-2">{{ product.category }}</span>
-              <h6 class="card-title">{{ product.name[:50] }}{% if product.name|length > 50 %}...{% endif %}</h6>
-              <div class="mt-auto">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="fw-bold text-success">{{ product.price }} грн</span>
-                  {% if product.stock_quantity > 0 %}
-                  <span class="badge bg-success">В наявності</span>
-                  {% else %}
-                  <span class="badge bg-secondary">Під замовлення</span>
-                  {% endif %}
-                </div>
-                <a href="/product/{{ product.id }}" class="btn btn-primary w-100 mt-2">Детальніше</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <div class="col-12">
-          <div class="alert alert-info text-center">
-            <p class="mb-0">Товари ще не додані. <a href="/admin" class="alert-link">Додайте товари через адмін-панель</a></p>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </section>
+    <!-- Bootstrap JS (popper + bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Додаємо поточний рік в підвал
+      document.addEventListener("DOMContentLoaded", function () {
+        const yearElements = document.querySelectorAll("footer");
+        yearElements.forEach((element) => {
+          if (element.textContent.includes("{{ now.year if now else 2024 }}")) {
+            const currentYear = new Date().getFullYear();
+            element.innerHTML = element.innerHTML.replace(
+              "{{ now.year if now else 2024 }}",
+              currentYear
+            );
+          }
+        });
 
-    <!-- Як це працює -->
-    <section class="mb-5">
-      <h2 class="text-center mb-4">Як це працює</h2>
-      <div class="row g-4">
-        <div class="col-md-3">
-          <div class="text-center">
-            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" 
-                 style="width: 60px; height: 60px;">
-              <span class="fs-4">1</span>
-            </div>
-            <h5>Вибір товару або заявка</h5>
-            <p class="text-muted">Оберіть товар в магазині або створіть заявку на ремонт</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-center">
-            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" 
-                 style="width: 60px; height: 60px;">
-              <span class="fs-4">2</span>
-            </div>
-            <h5>Оформлення</h5>
-            <p class="text-muted">Заповніть необхідну інформацію та підтвердіть замовлення</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-center">
-            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" 
-                 style="width: 60px; height: 60px;">
-              <span class="fs-4">3</span>
-            </div>
-            <h5>Обробка</h5>
-            <p class="text-muted">Наші спеціалісти обробляють ваш запит</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-center">
-            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" 
-                 style="width: 60px; height: 60px;">
-              <span class="fs-4">4</span>
-            </div>
-            <h5>Завершення</h5>
-            <p class="text-muted">Отримайте товар або відремонтований пристрій</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Переваги -->
-    <section class="bg-white rounded p-5 shadow-sm mb-5">
-      <h2 class="text-center mb-4">Чому обирають нас</h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="d-flex gap-3">
-            <div class="text-primary fs-3">✓</div>
-            <div>
-              <h5>Гарантія якості</h5>
-              <p class="text-muted mb-0">На всі послуги та товари надається гарантія</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="d-flex gap-3">
-            <div class="text-primary fs-3">⚡</div>
-            <div>
-              <h5>Швидке обслуговування</h5>
-              <p class="text-muted mb-0">Середній час обробки заявки - 24 години</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="d-flex gap-3">
-            <div class="text-primary fs-3">👨‍🔧</div>
-            <div>
-              <h5>Кваліфіковані майстри</h5>
-              <p class="text-muted mb-0">Усі майстри мають сертифікати та досвід</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Корисні посилання -->
-    <section class="mb-5">
-      <h5 class="mb-3">Корисні посилання</h5>
-      <div class="d-flex flex-wrap gap-3">
-        <a class="card text-decoration-none text-dark flex-fill" style="min-width: 200px;" href="/faq">
-          <div class="card-body">
-            <h6 class="card-title mb-1">Часті питання</h6>
-            <p class="card-text text-muted small mb-0">Відповіді на популярні питання</p>
-          </div>
-        </a>
-
-        <a class="card text-decoration-none text-dark flex-fill" style="min-width: 200px;" href="/account/repair/add">
-          <div class="card-body">
-            <h6 class="card-title mb-1">Створити заявку</h6>
-            <p class="card-text text-muted small mb-0">Подати заявку на ремонт техніки</p>
-          </div>
-        </a>
-
-        <a class="card text-decoration-none text-dark flex-fill" style="min-width: 200px;" href="/account/repairs">
-          <div class="card-body">
-            <h6 class="card-title mb-1">Мої заявки</h6>
-            <p class="card-text text-muted small mb-0">Перегляд статусу ваших заявок</p>
-          </div>
-        </a>
-      </div>
-    </section>
-  </main>
-
-  <!-- Підвал -->
-  <footer class="bg-dark text-white py-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-4 mb-4">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <div class="rounded bg-white text-primary d-flex align-items-center justify-content-center" 
-                 style="width: 40px; height: 40px; font-weight: 700;">
-              R
-            </div>
-            <div>
-              <div class="fw-bold fs-5">RepairHub</div>
-              <div class="text-muted">Ремонт та продаж техніки</div>
-            </div>
-          </div>
-          <p class="text-muted">Якісний ремонт техніки та широкий вибір нової побутової техніки.</p>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 mb-4">
-          <h5>Магазин</h5>
-          <ul class="list-unstyled">
-            <li><a href="/products" class="text-muted text-decoration-none">Всі товари</a></li>
-            <li><a href="/products?category=Пилососи" class="text-muted text-decoration-none">Пилососи</a></li>
-            <li><a href="/products?category=Холодильники" class="text-muted text-decoration-none">Холодильники</a></li>
-            <li><a href="/products?category=Комп'ютери" class="text-muted text-decoration-none">Комп'ютери</a></li>
-          </ul>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 mb-4">
-          <h5>Клієнтам</h5>
-          <ul class="list-unstyled">
-            <li><a href="/account/repair/add" class="text-muted text-decoration-none">Створити заявку</a></li>
-            <li><a href="/account/repairs" class="text-muted text-decoration-none">Мої заявки</a></li>
-            <li><a href="/faq" class="text-muted text-decoration-none">FAQ</a></li>
-            <li><a href="/auth/login" class="text-muted text-decoration-none">Особистий кабінет</a></li>
-          </ul>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 mb-4">
-          <h5>Контакти</h5>
-          <ul class="list-unstyled">
-            <li class="text-muted">м. Київ, вул. Технічна, 123</li>
-            <li class="text-muted">+380 (44) 123-45-67</li>
-            <li class="text-muted">info@repairhub.ua</li>
-            <li class="text-muted">Пн-Пт: 9:00-18:00</li>
-          </ul>
-        </div>
-        
-        <div class="col-lg-2 mb-4">
-          <h5>Соціальні мережі</h5>
-          <div class="d-flex gap-3">
-            <a href="#" class="text-white fs-5">📘</a>
-            <a href="#" class="text-white fs-5">📷</a>
-            <a href="#" class="text-white fs-5">📹</a>
-            <a href="#" class="text-white fs-5">💬</a>
-          </div>
-        </div>
-      </div>
-      
-      <hr class="text-muted my-4">
-      
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-        <div class="mb-3 mb-md-0">
-          <span class="text-muted">© {{ now.year if now else 2024 }} RepairHub</span>
-          <span class="text-muted mx-2">•</span>
-          <a href="#" class="text-muted text-decoration-none">Політика конфіденційності</a>
-        </div>
-        <div class="text-muted">
-          Навчальний проєкт • Версія MVP
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Bootstrap JS (popper + bootstrap) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Додаємо поточний рік в підвал
-    document.addEventListener('DOMContentLoaded', function() {
-      const yearElements = document.querySelectorAll('footer');
-      yearElements.forEach(element => {
-        if (element.textContent.includes('{{ now.year if now else 2024 }}')) {
-          const currentYear = new Date().getFullYear();
-          element.innerHTML = element.innerHTML.replace('{{ now.year if now else 2024 }}', currentYear);
-        }
+        // Активне меню навігації
+        const currentPath = window.location.pathname;
+        document.querySelectorAll(".nav-link").forEach((link) => {
+          if (link.getAttribute("href") === currentPath) {
+            link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+        });
       });
-      
-      // Активне меню навігації
-      const currentPath = window.location.pathname;
-      document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-        } else {
-          link.classList.remove('active');
-        }
-      });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>

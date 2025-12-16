@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .product-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e9ecef;
+            height: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .product-img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .price {
+            color: #198754;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .category-badge {
+            cursor: pointer;
+        }
+        .stock-badge {
+            font-size: 0.8rem;
+        }
+        .filter-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
+                     style="width:40px;height:40px;font-weight:700;">R</div>
+                <div>
+                    <div class="fw-bold">RepairHub</div>
+                    <div class="text-muted small">Магазин техніки</div>
+                </div>
+            </a>
+            
+            <div class="ms-auto d-flex gap-3">
+                <a href="/" class="btn btn-link">Головна</a>
+                <a href="/products" class="btn btn-link active">Магазин</a>
+                {% if is_authenticated %}
+                    <a href="/account/dashboard" class="btn btn-outline-primary">Кабінет</a>
+                {% else %}
+                    <a href="/auth/login" class="btn btn-outline-secondary">Увійти</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        <!-- Заголовок -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>🛒 Магазин техніки</h1>
+            <div class="text-muted">
+                Знайдено: {{ products|length }} товарів
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Левая колонка - фильтры -->
+            <div class="col-lg-3 mb-4">
+                <div class="card filter-sidebar">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">🔍 Фільтри</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="filter-form">
+                            <!-- Поиск -->
+                            <div class="mb-3">
+                                <label class="form-label">Пошук товару</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="search" 
+                                       value="{{ search_query or '' }}"
+                                       placeholder="Назва товару...">
+                            </div>
+                            
+                            <!-- Категория -->
+                            <div class="mb-3">
+                                <label class="form-label">Категорія</label>
+                                <select class="form-select" name="category">
+                                    <option value="">Всі категорії</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.value }}" 
+                                            {% if selected_category == cat.value %}selected{% endif %}>
+                                        {{ cat.value }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Цена -->
+                            <div class="mb-4">
+                                <label class="form-label">Ціна, грн</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               name="min_price" 
+                                               placeholder="Від"
+                                               value="{{ min_price or '' }}">
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               name="max_price" 
+                                               placeholder="До"
+                                               value="{{ max_price or '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-funnel me-1"></i> Застосувати
+                            </button>
+                            <a href="/products" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle me-1"></i> Скинути
+                            </a>
+                        </form>
+                    </div>
+                    
+                    <!-- Быстрые категории -->
+                    <div class="card-footer">
+                        <h6 class="mb-2">🏷️ Швидкий вибір:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for cat in categories[:6] %}
+                            <a href="/products?category={{ cat.value }}" 
+                               class="badge bg-light text-dark text-decoration-none category-badge">
+                                {{ cat.value }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Правая колонка - товары -->
+            <div class="col-lg-9">
+                {% if products %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for product in products %}
+                    <div class="col">
+                        <div class="card product-card h-100">
+                            <!-- Изображение -->
+                            <div class="position-relative">
+                                {% if product.image_url %}
+                                <img src="{{ product.image_url }}" 
+                                     class="card-img-top product-img" 
+                                     alt="{{ product.name }}"
+                                     onerror="this.src='https://via.placeholder.com/300x200?text=Товар'">
+                                {% else %}
+                                <div class="product-img bg-secondary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-image text-white fs-1"></i>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Категория -->
+                                <span class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                    {{ product.category.value }}
+                                </span>
+                                
+                                <!-- Наличие -->
+                                <span class="position-absolute top-0 end-0 m-2 badge {% if product.stock_quantity > 0 %}bg-success{% else %}bg-danger{% endif %} stock-badge">
+                                    {% if product.stock_quantity > 0 %}
+                                    {{ product.stock_quantity }} шт.
+                                    {% else %}
+                                    Немає
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <!-- Информация -->
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text text-muted small flex-grow-1">
+                                    {{ product.description|truncate(100) }}
+                                </p>
+                                
+                                <div class="mt-auto">
+                                    <!-- Цена -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="price">{{ product.price|round(2) }} грн</span>
+                                        <small class="text-muted">ID: {{ product.id }}</small>
+                                    </div>
+                                    
+                                    <!-- Кнопки -->
+                                    <div class="d-grid gap-2">
+                                        <a href="/product/{{ product.id }}" 
+                                           class="btn btn-outline-primary">
+                                            <i class="bi bi-eye me-1"></i> Детальніше
+                                        </a>
+                                        {% if product.stock_quantity > 0 %}
+                                        <button class="btn btn-success">
+                                            <i class="bi bi-cart-plus me-1"></i> В кошик
+                                        </button>
+                                        {% else %}
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="bi bi-x-circle me-1"></i> Немає в наявності
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Дата -->
+                            <div class="card-footer text-muted small">
+                                <i class="bi bi-calendar me-1"></i>
+                                Додано: {{ product.created_at.strftime('%d.%m.%Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Сообщение, если товаров нет -->
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-4">😕</div>
+                    <h3 class="mb-3">Товари не знайдені</h3>
+                    <p class="text-muted mb-4">
+                        Спробуйте змінити параметри фільтрів або зверніться до адміністратора.
+                    </p>
+                    <a href="/products" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Показати всі товари
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="mb-2">
+                <a href="/" class="text-white text-decoration-none me-3">Головна</a>
+                <a href="/products" class="text-white text-decoration-none me-3">Магазин</a>
+                <a href="/account/dashboard" class="text-white text-decoration-none me-3">Кабінет</a>
+                <a href="/auth/register" class="text-white text-decoration-none">Реєстрація</a>
+            </div>
+            <div class="text-muted small">
+                © {{ now.year if now else "2024" }} RepairHub • Магазин техніки
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Автоматическая отправка формы при изменении фильтров
+        document.querySelectorAll('#filter-form select').forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filter-form').submit();
+            });
+        });
+        
+        // Обновляем год в подвале
+        document.addEventListener('DOMContentLoaded', function() {
+            const footer = document.querySelector('footer .text-muted');
+            if (footer && footer.textContent.includes('{{ now.year if now else "2025" }}')) {
+                const currentYear = new Date().getFullYear();
+                footer.innerHTML = footer.innerHTML.replace('{{ now.year if now else "2025" }}', currentYear);
+            }
+        });
+    </script>
+</body>
+</html>

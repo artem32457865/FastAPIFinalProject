@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">RepairHub</a>
+            <div class="ms-auto">
+                <a href="/products" class="btn btn-link">← До магазину</a>
+                <a href="/" class="btn btn-link">Головна</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Хлебные крошки -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Головна</a></li>
+                <li class="breadcrumb-item"><a href="/products">Магазин</a></li>
+                <li class="breadcrumb-item active">{{ product.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="row">
+            <!-- Левая колонка - изображение -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" 
+                             class="img-fluid rounded" 
+                             alt="{{ product.name }}"
+                             style="max-height: 400px;">
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                             style="height: 300px;">
+                            <i class="bi bi-image text-muted fs-1"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Правая колонка - информация -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Категория -->
+                        <span class="badge bg-info mb-3">{{ product.category.value }}</span>
+                        
+                        <!-- Название -->
+                        <h2 class="card-title mb-3">{{ product.name }}</h2>
+                        
+                        <!-- Описание -->
+                        <p class="card-text mb-4">{{ product.description }}</p>
+                        
+                        <!-- Цена -->
+                        <div class="mb-4">
+                            <h3 class="text-success">{{ product.price }} грн</h3>
+                        </div>
+                        
+                        <!-- Наличие -->
+                        <div class="mb-4">
+                            {% if product.stock_quantity > 0 %}
+                            <span class="badge bg-success fs-6 p-2">
+                                <i class="bi bi-check-circle me-1"></i>
+                                В наявності: {{ product.stock_quantity }} шт.
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger fs-6 p-2">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Немає в наявності
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Кнопки действий -->
+                        <div class="d-grid gap-2 mb-4">
+                            {% if product.stock_quantity > 0 %}
+                            <button class="btn btn-success btn-lg">
+                                <i class="bi bi-cart-plus me-2"></i> Додати в кошик
+                            </button>
+                            {% endif %}
+                            <a href="/products?category={{ product.category.value }}" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-grid me-1"></i> Дивитись схожі
+                            </a>
+                        </div>
+                        
+                        <!-- Детали -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">📋 Деталі товару</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <strong>ID:</strong> 
+                                        <span class="text-muted">{{ product.id }}</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Категорія:</strong> 
+                                        <span class="text-muted">{{ product.category.value }}</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Додано:</strong> 
+                                        <span class="text-muted">{{ product.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Похожие товары -->
+        {% if similar_products %}
+        <div class="mt-5">
+            <h4 class="mb-4">🛍️ Схожі товари</h4>
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for similar in similar_products %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ similar.name|truncate(50) }}</h6>
+                            <p class="card-text text-success fw-bold">{{ similar.price }} грн</p>
+                            <a href="/product/{{ similar.id }}" class="btn btn-sm btn-outline-primary w-100">
+                                Детальніше
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Подвал -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="text-muted small">
+                © {{ now.year if now else "2024" }} RepairHub • Деталі товару
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

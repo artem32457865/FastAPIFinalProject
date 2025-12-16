@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Особистий кабінет - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .profile-card {
+            max-width: 600px;
+            margin: 2rem auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            margin: 0 auto;
+        }
+        .quick-actions .btn {
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
+                     style="width:40px;height:40px;font-weight:700;">R</div>
+                <div>
+                    <div class="fw-bold">RepairHub</div>
+                    <div class="text-muted small">Ремонт техніки</div>
+                </div>
+            </a>
+            
+            <div class="ms-auto d-flex gap-3">
+                <a href="/" class="btn btn-link">Головна</a>
+                <a href="/products" class="btn btn-link">Магазин</a>
+                <a href="/auth/logout" class="btn btn-outline-danger">Вийти</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <div class="profile-card card">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <div class="user-avatar mb-3">
+                    {{ user.username[0]|upper }}
+                </div>
+                <h3 class="mb-0">{{ user.username }}</h3>
+                <p class="mb-0 opacity-75">{{ user.email }}</p>
+            </div>
+            
+            <div class="card-body p-4">
+                <!-- Статус -->
+                <div class="text-center mb-4">
+                    {% if user.is_admin %}
+                    <span class="badge bg-danger fs-6 py-2 px-3">👑 Адміністратор</span>
+                    {% else %}
+                    <span class="badge bg-success fs-6 py-2 px-3">👤 Користувач</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Информация -->
+                <div class="mb-4">
+                    <h5 class="mb-3">📋 Ваша інформація</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>ID:</strong> <span class="text-muted">#{{ user.id }}</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Email:</strong> <span class="text-muted">{{ user.email }}</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Ім'я:</strong> <span class="text-muted">{{ user.username }}</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Статус:</strong> 
+                            <span class="text-muted">
+                                {% if user.is_admin %}Адміністратор{% else %}Користувач{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Быстрые действия -->
+                <div class="mb-4">
+                    <h5 class="mb-3">🚀 Швидкі дії</h5>
+                    <div class="row quick-actions g-3">
+                        <div class="col-md-4">
+                            <a href="/account/repair/add" class="btn btn-primary w-100 py-2">
+                                ✨ Створити заявку
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/account/repairs" class="btn btn-outline-primary w-100 py-2">
+                                📋 Мої заявки
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/products" class="btn btn-outline-success w-100 py-2">
+                                🛒 Магазин
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Статистика (можно добавить позже) -->
+                <div class="mt-4">
+                    <h5 class="mb-3">📊 Статистика</h5>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded p-3">
+                                <div class="fs-4 text-primary">0</div>
+                                <div class="text-muted small">Активних заявок</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded p-3">
+                                <div class="fs-4 text-success">0</div>
+                                <div class="text-muted small">Завершених</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded p-3">
+                                <div class="fs-4 text-info">0</div>
+                                <div class="text-muted small">Замовлень</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer text-center text-muted py-3">
+                <small>
+                    Зареєстровано з ID {{ user.id }} • 
+                    <a href="/auth/logout" class="text-decoration-none">Вийти з акаунту</a>
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Подвал -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="mb-2">
+                <a href="/" class="text-white text-decoration-none me-3">Головна</a>
+                <a href="/products" class="text-white text-decoration-none me-3">Магазин</a>
+                <a href="/account/dashboard" class="btn btn-outline-primary">Кабінет</a>
+            </div>
+            <div class="text-muted small">
+                © 2025 RepairHub • Особистий кабінет користувача
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обновляем год в подвале
+            const yearElement = document.querySelector('footer .text-muted');
+            if (yearElement && yearElement.textContent.includes('2024')) {
+                yearElement.innerHTML = yearElement.innerHTML.replace('2024', new Date().getFullYear());
+            }
+        });
+    </script>
+</body>
+</html>

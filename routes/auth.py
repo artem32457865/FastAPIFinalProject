@@ -274,8 +274,12 @@ async def register_user_api(user: UserInput, db: AsyncSession = Depends(get_db))
             detail="Користувач з таким email вже існує"
         )
     
-    new_user = User(**user.model_dump())
-    new_user.password = generate_password_hash(user.password)
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        password=generate_password_hash(user.password)
+        )
+
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
