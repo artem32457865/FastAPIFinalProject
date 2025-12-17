@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка #{{ repair.id }} - RepairHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Навігаційна панель -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/">RepairHub Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Головна</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/repairs">Заявки</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">Користувачі</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text me-3">Адміністратор: {{ current_user.username }}</span>
+                    <a href="/" class="btn btn-outline-light btn-sm">На сайт</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Бічна панель -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/">
+                                <i class="bi bi-speedometer2 me-2"></i>Головна
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/repairs">
+                                <i class="bi bi-tools me-2"></i>Заявки на ремонт
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/self/repairs">
+                                <i class="bi bi-person-workspace me-2"></i>Мої заявки
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people me-2"></i>Користувачі
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Основний вміст -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Заявка #{{ repair.id }}</h1>
+                    <div>
+                        <a href="/admin/repairs" class="btn btn-secondary">Назад до списку</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Інформація про заявку -->
+                    <div class="col-md-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Деталі заявки</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>ID:</strong></div>
+                                    <div class="col-sm-9">{{ repair.id }}</div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>Статус:</strong></div>
+                                    <div class="col-sm-9">
+                                        {% if repair.status == "Нова" %}
+                                            <span class="badge bg-warning">{{ repair.status }}</span>
+                                        {% elif repair.status == "В обробці" %}
+                                            <span class="badge bg-primary">{{ repair.status }}</span>
+                                        {% elif repair.status == "Завершено" %}
+                                            <span class="badge bg-success">{{ repair.status }}</span>
+                                        {% elif repair.status == "Скасовано" %}
+                                            <span class="badge bg-danger">{{ repair.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ repair.status }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>Користувач:</strong></div>
+                                    <div class="col-sm-9">{{ repair.user.username }} ({{ repair.user.email }})</div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>Дата створення:</strong></div>
+                                    <div class="col-sm-9">{{ repair.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>Опис проблеми:</strong></div>
+                                    <div class="col-sm-9">{{ repair.description }}</div>
+                                </div>
+                                {% if repair.photo_url %}
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3"><strong>Фото:</strong></div>
+                                    <div class="col-sm-9">
+                                        <img src="{{ repair.photo_url }}" alt="Фото поломки" class="img-fluid" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Коментарі -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Коментарі</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if repair.messages %}
+                                    {% for message in repair.messages %}
+                                    <div class="border p-3 mb-3 rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Адміністратор #{{ message.admin_id }}</strong>
+                                            <small class="text-muted">{{ message.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                                        </div>
+                                        <p class="mt-2 mb-0">{{ message.message }}</p>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">Коментарі відсутні</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Панель дій -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Дії</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if not repair.admin_id %}
+                                <form method="post" action="/admin/repair/{{ repair.id }}/assign">
+                                    <button type="submit" class="btn btn-success w-100 mb-2">Прийняти заявку</button>
+                                </form>
+                                {% elif repair.admin_id == current_user.id %}
+                                <div class="alert alert-info">
+                                    Заявку прийнято вами
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning">
+                                    Заявку прийнято адміністратором #{{ repair.admin_id }}
+                                </div>
+                                {% endif %}
+
+                                <!-- Зміна статусу -->
+                                <form method="post" action="/admin/repair/{{ repair.id }}/change/status" class="mt-3">
+                                    <div class="mb-2">
+                                        <label class="form-label">Змінити статус:</label>
+                                        <select name="status" class="form-select">
+                                            <option value="Нова" {% if repair.status == "Нова" %}selected{% endif %}>Нова</option>
+                                            <option value="В обробці" {% if repair.status == "В обробці" %}selected{% endif %}>В обробці</option>
+                                            <option value="Повідомлення" {% if repair.status == "Повідомлення" %}selected{% endif %}>Повідомлення</option>
+                                            <option value="Завершено" {% if repair.status == "Завершено" %}selected{% endif %}>Завершено</option>
+                                            <option value="Скасовано" {% if repair.status == "Скасовано" %}selected{% endif %}>Скасовано</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Змінити статус</button>
+                                </form>
+
+                                <!-- Додати коментар -->
+                                <form method="post" action="/admin/repair/{{ repair.id }}/change/comment" class="mt-3">
+                                    <div class="mb-2">
+                                        <label class="form-label">Додати коментар:</label>
+                                        <textarea name="message" class="form-control" rows="3" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary w-100">Додати коментар</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

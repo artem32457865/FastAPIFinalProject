@@ -76,6 +76,9 @@
             
             {% if current_user %}
                 <a href="/account/dashboard" class="btn btn-outline-primary">Кабінет</a>
+                {% if current_user.is_admin %}
+                <a href="/admin/" class="btn btn-danger">Адмін панель</a>
+                {% endif %}
                 <a href="/auth/logout" class="btn btn-outline-secondary">Вийти</a>
             {% else %}
                 <a href="/auth/login" class="btn btn-outline-secondary">Увійти</a>
@@ -275,7 +278,7 @@
             <div class="alert alert-info text-center">
               <p class="mb-0">
                 Товари ще не додані.
-                <a href="/admin" class="alert-link"
+                <a href="/admin/" class="alert-link"
                   >Додайте товари через адмін-панель</a
                 >
               </p>

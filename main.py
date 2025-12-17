@@ -1,25 +1,27 @@
 import uvicorn
 from fastapi import FastAPI, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse , RedirectResponse
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from routes import auth_router, frontend_router, user_account_router
+from routes import auth_router, frontend_router, user_account_router, admin_panel_router
 from routes.products import router as products_router 
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
 # Импортируем шаблоны
 templates = Jinja2Templates(directory="templates")
 
-# Подключение роутеров
+# Подключение роутеров - порядок важен!
+# Сначала специфические роутеры, потом общие
+app.include_router(admin_panel_router, tags=["admin"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(user_account_router, prefix="/account", tags=["account"])
 app.include_router(products_router, prefix="", tags=["products"]) 
 app.include_router(frontend_router, prefix="", tags=["frontend"])  
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Глобальный обработчик ошибок 404
 @app.exception_handler(404)
 async def not_found_exception_handler(request: Request, exc: HTTPException):
@@ -139,6 +141,9 @@ async def api_root():
         }
     }
 
+@app.get("/admin")
+async def admin_redirect():
+    return RedirectResponse("/admin/")
 
 if __name__ == "__main__":
     uvicorn.run(f"{__name__}:app", port=8000, reload=True)

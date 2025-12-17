@@ -30,8 +30,10 @@ async def home(request: Request, error: str | None = None, db: AsyncSession = De
 
 @router.get("/{full_path:path}")
 async def catch_all(request: Request, full_path: str, db: AsyncSession = Depends(get_db)):
-    if full_path.startswith("api/") or full_path.startswith("auth/") or full_path.startswith("account/"):
-        return
+    protected_paths = ["api/", "auth/", "account/", "admin/"]
+    for path in protected_paths:
+        if full_path.startswith(path):
+            return None
     
     # Отримуємо поточного користувача для шаблону помилки
     current_user = await get_current_user_from_cookies(request, db)

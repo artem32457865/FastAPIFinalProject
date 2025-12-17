@@ -63,7 +63,7 @@
             
             <!-- Адміністративні посилання (працюють тільки для адмінів) -->
             {% if request and request.state and request.state.user and request.state.user.is_admin %}
-            <li class="nav-item"><a class="nav-link" href="/admin">Адмін-панель</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/">Адмін-панель</a></li>
             {% endif %}
             
             <!-- Посилання для авторизованих користувачів -->
