@@ -166,3 +166,75 @@ class Product(Base):
 
     def __str__(self):
         return f"<Product> {self.name} - {self.price} грн"
+
+
+class Cart(Base):
+    __tablename__ = "carts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(default=1)
+    added_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())
+
+    user: Mapped["User"] = relationship("User", backref="cart_items")
+    product: Mapped["Product"] = relationship("Product")
+
+
+class OrderStatus(str, Enum):
+    NEW = "Новий"
+    PROCESSING = "В обробці"
+    CONFIRMED = "Підтверджено"
+    PREPARING = "Готується"
+    READY = "Готовий"
+    ON_THE_WAY = "В дорозі"
+    DELIVERED = "Доставлено"
+    CANCELLED = "Скасовано"
+
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    total_amount: Mapped[float] = mapped_column(nullable=False)
+    status: Mapped[OrderStatus] = mapped_column(
+        SQLEnum(OrderStatus, name="order_status"),
+        default=OrderStatus.NEW.value
+    )
+    customer_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    customer_phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    customer_email: Mapped[str] = mapped_column(String(100), nullable=False)
+    shipping_address: Mapped[str] = mapped_column(Text, nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, default=func.now(), onupdate=func.now()
+    )
+
+    user: Mapped["User"] = relationship("User", backref="orders")
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem",
+        back_populates="order",
+        cascade="all, delete-orphan"
+    )
+
+    def __str__(self):
+        return f"<Order #{self.id} - {self.status}>"
+
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(default=1)
+    price: Mapped[float] = mapped_column(nullable=False)  # Цена на момент покупки
+
+    order: Mapped["Order"] = relationship("Order", back_populates="items")
+    product: Mapped["Product"] = relationship("Product")
+
+    def __str__(self):
+        return f"<OrderItem {self.product_id} x{self.quantity}>"

@@ -6,19 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from werkzeug.security import generate_password_hash
 from models.models import User, Product, ProductCategory
-from settings import Base, async_engine, async_session
-
-
-async def create_db():
-    """Создание всех таблиц в БД"""
-    print("🔄 Создание таблиц в БД...")
-    
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        print("✅ Старые таблицы удалены")
-        
-        await conn.run_sync(Base.metadata.create_all)
-        print("✅ Новые таблицы созданы")
+from settings import async_session
 
 
 async def insert_data():
@@ -142,7 +130,6 @@ async def main():
     print("🚀 Начало миграции базы данных...")
     
     try:
-        await create_db()
         await insert_data()
         
         print("🎉 Миграция успешно завершена!")
@@ -151,12 +138,9 @@ async def main():
         print("👤 Пользователь: email=user@example.com / пароль=user123")
         
     except Exception as e:
-        print(f"❌ Ошибка: {type(e).__name__}: {e}")
+        print(f"❌ Помилка: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-    
-    finally:
-        await async_engine.dispose()
 
 
 if __name__ == "__main__":

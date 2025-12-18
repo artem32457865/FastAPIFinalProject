@@ -7,7 +7,10 @@ from sqlalchemy.orm import selectinload
 
 from routes.auth import require_admin
 from settings import get_db
-from models.models import User, RepairRequest, RequestStatus, AdminMessage
+from models.models import User, RepairRequest, RequestStatus, AdminMessage, Order, OrderStatus, OrderItem, Product
+from datetime import datetime
+
+
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="templates")
@@ -234,4 +237,136 @@ async def admin_users_list(
             "current_user": current_user,
             "users": users
         }
+    )
+
+
+@router.get("/orders", response_class=HTMLResponse)
+async def admin_orders_list(
+        request: Request,
+        status: str | None = None,
+        db: AsyncSession = Depends(get_db)
+):
+    """Перегляд всіх замовлень"""
+    current_user = await require_admin(request, db)
+
+    # Отримуємо замовлення
+    stmt = select(Order).options(
+        selectinload(Order.user)
+    )
+
+    if status:
+        try:
+            status_enum = OrderStatus(status)
+            stmt = stmt.where(Order.status == status_enum)
+        except ValueError:
+            pass
+
+    stmt = stmt.order_by(Order.created_at.desc())
+    result = await db.execute(stmt)
+    orders = result.scalars().all()
+
+    return templates.TemplateResponse(
+        "admin/orders.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "orders": orders,
+            "statuses": list(OrderStatus),
+            "selected_status": status,
+            "now": datetime.now()
+        }
+    )
+
+
+@router.get("/order/{order_id}", response_class=HTMLResponse)
+async def admin_order_detail(
+        request: Request,
+        order_id: int,
+        db: AsyncSession = Depends(get_db)
+):
+    """Деталі замовлення для адміна"""
+    current_user = await require_admin(request, db)
+
+    # Отримуємо замовлення
+    stmt = select(Order).where(Order.id == order_id).options(
+        selectinload(Order.user),
+        selectinload(Order.items).selectinload(OrderItem.product)
+    )
+
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
+
+    return templates.TemplateResponse(
+        "admin/order_detail.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "order": order,
+            "statuses": list(OrderStatus),
+            "now": datetime.now()
+        }
+    )
+
+
+@router.post("/order/{order_id}/update-status")
+async def update_order_status(
+        request: Request,
+        order_id: int,
+        status: OrderStatus = Form(...),
+        db: AsyncSession = Depends(get_db)
+):
+    """Оновлення статусу замовлення"""
+    current_user = await require_admin(request, db)
+
+    # Отримуємо замовлення
+    stmt = select(Order).where(Order.id == order_id)
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
+
+    # Оновлюємо статус
+    order.status = status
+    await db.commit()
+
+    return RedirectResponse(
+        url=f"/admin/order/{order_id}",
+        status_code=303
+    )
+
+
+@router.post("/order/{order_id}/add-note")
+async def add_order_note(
+        request: Request,
+        order_id: int,
+        note: str = Form(...),
+        db: AsyncSession = Depends(get_db)
+):
+    """Додати примітку до замовлення"""
+    current_user = await require_admin(request, db)
+
+    # Отримуємо замовлення
+    stmt = select(Order).where(Order.id == order_id)
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
+
+    # Оновлюємо примітку
+    timestamp = datetime.now().strftime('%d.%m.%Y %H:%M')
+    if order.notes:
+        order.notes += f"\n[{timestamp}] {note}"
+    else:
+        order.notes = f"[{timestamp}] {note}"
+
+    await db.commit()
+
+    return RedirectResponse(
+        url=f"/admin/order/{order_id}",
+        status_code=303
     )

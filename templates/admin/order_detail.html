@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення #{{ order.id }} - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/">RepairHub Admin</a>
+            <div>
+                <a href="/admin/orders" class="btn btn-outline-light btn-sm">← До замовлень</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Замовлення #{{ order.id }}</h1>
+            <span class="badge fs-6 
+                {% if order.status.value == 'Новий' %}bg-warning
+                {% elif order.status.value == 'В обробці' %}bg-info
+                {% elif order.status.value == 'Підтверджено' %}bg-primary
+                {% elif order.status.value == 'Готується' %}bg-secondary
+                {% elif order.status.value == 'Готовий' %}bg-success
+                {% elif order.status.value == 'В дорозі' %}bg-primary
+                {% elif order.status.value == 'Доставлено' %}bg-success
+                {% elif order.status.value == 'Скасовано' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ order.status.value }}
+            </span>
+        </div>
+
+        <div class="row">
+            <!-- Основная информация -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Інформація про замовлення</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Дані клієнта:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Ім'я:</strong> {{ order.customer_name }}</li>
+                                    <li><strong>Телефон:</strong> {{ order.customer_phone }}</li>
+                                    <li><strong>Email:</strong> {{ order.customer_email }}</li>
+                                    <li><strong>Адреса:</strong> {{ order.shipping_address }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Деталі замовлення:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>ID:</strong> #{{ order.id }}</li>
+                                    <li><strong>Користувач:</strong> {{ order.user.username }}</li>
+                                    <li><strong>Створено:</strong> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</li>
+                                    <li><strong>Оновлено:</strong> {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}</li>
+                                    <li><strong>Сума:</strong> {{ order.total_amount }} грн</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Товары -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Товари в замовленні</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Кількість</th>
+                                    <th>Ціна</th>
+                                    <th>Сума</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.price }} грн</td>
+                                    <td>{{ item.price * item.quantity }} грн</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="3">Загальна сума:</th>
+                                    <th>{{ order.total_amount }} грн</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Примітки -->
+                {% if order.notes %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Примітки</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre style="white-space: pre-wrap;">{{ order.notes }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Панель управления -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Управління замовленням</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Изменение статуса -->
+                        <form method="post" action="/admin/order/{{ order.id }}/update-status" class="mb-4">
+                            <div class="mb-3">
+                                <label class="form-label">Змінити статус:</label>
+                                <select name="status" class="form-select" required>
+                                    {% for status in statuses %}
+                                    <option value="{{ status.value }}" 
+                                            {% if order.status.value == status.value %}selected{% endif %}>
+                                        {{ status.value }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    <small>Статуси замовлення:</small>
+                                    <ul class="small mb-0">
+                                        <li><strong>Новий</strong> - тільки що створений</li>
+                                        <li><strong>В обробці</strong> - менеджер прийняв замовлення</li>
+                                        <li><strong>Підтверджено</strong> - клієнт підтвердив</li>
+                                        <li><strong>Готується</strong> - збирається на складі</li>
+                                        <li><strong>Готовий</strong> - готовий до відправки</li>
+                                        <li><strong>В дорозі</strong> - кур'єр везе</li>
+                                        <li><strong>Доставлено</strong> - клієнт отримав</li>
+                                        <li><strong>Скасовано</strong> - замовлення скасовано</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Оновити статус</button>
+                        </form>
+
+                        <hr>
+
+                        <!-- Добавление примечания -->
+                        <form method="post" action="/admin/order/{{ order.id }}/add-note">
+                            <div class="mb-3">
+                                <label class="form-label">Додати примітку:</label>
+                                <textarea name="note" class="form-control" rows="3" 
+                                          placeholder="Наприклад: Клієнт просив передзвонити о 18:00"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-secondary w-100">Додати примітку</button>
+                        </form>
+
+                        <hr>
+
+                        <!-- Быстрые действия -->
+                        <div class="mt-3">
+                            <h6>Швидкі дії:</h6>
+                            <div class="d-grid gap-2">
+                                <a href="tel:{{ order.customer_phone }}" class="btn btn-outline-success">
+                                    <i class="bi bi-telephone"></i> Зателефонувати
+                                </a>
+                                <a href="mailto:{{ order.customer_email }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-envelope"></i> Написати email
+                                </a>
+                                <button class="btn btn-outline-info" onclick="navigator.clipboard.writeText('Замовлення #{{ order.id }} - {{ order.customer_name }} - {{ order.customer_phone }}')">
+                                    <i class="bi bi-clipboard"></i> Копіювати дані
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- История статусов (можно добавить отдельную модель) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Історія замовлення</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <small class="text-muted">Створено:</small><br>
+                                {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </li>
+                            <li>
+                                <small class="text-muted">Останнє оновлення:</small><br>
+                                {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подвал -->
+    <footer class="bg-dark text-white py-3 mt-4">
+        <div class="container text-center">
+            <small>RepairHub Admin Panel • Замовлення #{{ order.id }}</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Подтверждение перед сменой статуса на "Скасовано"
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.querySelector('select[name="status"]');
+            const statusForm = document.querySelector('form[action*="update-status"]');
+            
+            statusForm.addEventListener('submit', function(e) {
+                if (statusSelect.value === 'Скасовано') {
+                    if (!confirm('Ви впевнені, що хочете скасувати це замовлення? Цю дію не можна скасувати.')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+            
+            // Копирование данных в буфер обмена
+            document.querySelectorAll('.btn-outline-info').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check"></i> Скопійовано!';
+                        this.classList.remove('btn-outline-info');
+                        this.classList.add('btn-outline-success');
+                        
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.classList.remove('btn-outline-success');
+                            this.classList.add('btn-outline-info');
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

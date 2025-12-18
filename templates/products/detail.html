@@ -14,7 +14,9 @@
             <a class="navbar-brand" href="/">RepairHub</a>
             <div class="ms-auto">
                 <a href="/products" class="btn btn-link">← До магазину</a>
-                <a href="/" class="btn btn-link">Головна</a>
+                <a href="/cart" class="btn btn-outline-success">
+                    <i class="bi bi-cart"></i> Кошик
+                </a>
             </div>
         </div>
     </nav>
@@ -28,6 +30,14 @@
                 <li class="breadcrumb-item active">{{ product.name }}</li>
             </ol>
         </nav>
+        
+        <!-- Сообщение об успешном добавлении в корзину -->
+        {% if request.query_params.get('message') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ request.query_params.get('message') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
         
         <div class="row">
             <!-- Левая колонка - изображение -->
@@ -85,37 +95,18 @@
                         <!-- Кнопки действий -->
                         <div class="d-grid gap-2 mb-4">
                             {% if product.stock_quantity > 0 %}
-                            <button class="btn btn-success btn-lg">
-                                <i class="bi bi-cart-plus me-2"></i> Додати в кошик
-                            </button>
+                            <form method="post" action="/cart/add">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-success btn-lg w-100">
+                                    <i class="bi bi-cart-plus me-2"></i> Додати в кошик
+                                </button>
+                            </form>
                             {% endif %}
                             <a href="/products?category={{ product.category.value }}" 
                                class="btn btn-outline-primary">
                                 <i class="bi bi-grid me-1"></i> Дивитись схожі
                             </a>
-                        </div>
-                        
-                        <!-- Детали -->
-                        <div class="card mt-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">📋 Деталі товару</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-2">
-                                        <strong>ID:</strong> 
-                                        <span class="text-muted">{{ product.id }}</span>
-                                    </li>
-                                    <li class="mb-2">
-                                        <strong>Категорія:</strong> 
-                                        <span class="text-muted">{{ product.category.value }}</span>
-                                    </li>
-                                    <li class="mb-2">
-                                        <strong>Додано:</strong> 
-                                        <span class="text-muted">{{ product.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
-                                    </li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,7 +122,7 @@
                 <div class="col">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h6 class="card-title">{{ similar.name|truncate(50) }}</h6>
+                            <h6 class="card-title">{{ similar.name[:50] }}{% if similar.name|length > 50 %}...{% endif %}</h6>
                             <p class="card-text text-success fw-bold">{{ similar.price }} грн</p>
                             <a href="/product/{{ similar.id }}" class="btn btn-sm btn-outline-primary w-100">
                                 Детальніше
@@ -149,7 +140,7 @@
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container text-center">
             <div class="text-muted small">
-                © {{ now.year if now else "2024" }} RepairHub • Деталі товару
+                © 2024 RepairHub • Деталі товару
             </div>
         </div>
     </footer>
