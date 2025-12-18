@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошик - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">RepairHub</a>
+            <div class="ms-auto">
+                <a href="/products" class="btn btn-link">← До магазину</a>
+                <a href="/" class="btn btn-link">Головна</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <h2>🛒 Ваш кошик</h2>
+        
+        {% if cart_items and cart_items|length > 0 %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Ціна</th>
+                            <th>Кількість</th>
+                            <th>Сума</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>
+                                {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="{{ item.name }}" width="50" height="50" class="me-2">
+                                {% endif %}
+                                {{ item.name }}
+                            </td>
+                            <td>{{ "%.2f"|format(item.price) }} грн</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ "%.2f"|format(item.price * item.quantity) }} грн</td>
+                            <td>
+                                <form method="post" action="/cart/remove" class="d-inline">
+                                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="text-end mt-4">
+                    <h4>Загальна сума: {{ "%.2f"|format(total) }} грн</h4>
+                    
+                    <div class="d-flex gap-2 justify-content-end mt-3">
+                        <form method="post" action="/cart/clear" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Очистити кошик
+                            </button>
+                        </form>
+                        
+                        <!-- ИСПРАВЛЕННАЯ КНОПКА ОФОРМЛЕНИЯ ЗАКАЗА -->
+                        {% if is_authenticated %}
+                        <a href="/checkout" class="btn btn-success btn-lg">
+                            <i class="bi bi-bag-check"></i> Оформити замовлення
+                        </a>
+                        {% else %}
+                        <a href="/auth/login" class="btn btn-success btn-lg">
+                            <i class="bi bi-bag-check"></i> Увійти для оформлення
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-cart-x fs-1"></i>
+                </div>
+                <div>
+                    <h4 class="alert-heading">Кошик порожній</h4>
+                    <p>Додайте товари з <a href="/products" class="alert-link">магазину</a>.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="text-muted small">
+                © 2024 RepairHub • Кошик покупок
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

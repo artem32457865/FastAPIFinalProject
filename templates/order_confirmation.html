@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення підтверджено - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">RepairHub</a>
+            <div class="ms-auto">
+                <a href="/orders" class="btn btn-link">Мої замовлення</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <div class="display-1 text-success mb-3">✅</div>
+            <h1 class="mb-3">Замовлення підтверджено!</h1>
+            <p class="lead">Дякуємо за ваше замовлення</p>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Деталі замовлення #{{ order.id }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Інформація про замовлення:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Номер замовлення:</strong> #{{ order.id }}</li>
+                            <li><strong>Дата:</strong> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</li>
+                            <li><strong>Статус:</strong> <span class="badge bg-warning">{{ order.status.value }}</span></li>
+                            <li><strong>Сума:</strong> {{ "%.2f"|format(order.total_amount) }} грн</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Дані клієнта:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Ім'я:</strong> {{ order.customer_name }}</li>
+                            <li><strong>Телефон:</strong> {{ order.customer_phone }}</li>
+                            <li><strong>Email:</strong> {{ order.customer_email }}</li>
+                            <li><strong>Адреса:</strong> {{ order.shipping_address }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6>Товари:</h6>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Кількість</th>
+                            <th>Ціна</th>
+                            <th>Сума</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ "%.2f"|format(item.price) }} грн</td>
+                            <td>{{ "%.2f"|format(item.price * item.quantity) }} грн</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-success">
+                            <th colspan="3">Загальна сума:</th>
+                            <th>{{ "%.2f"|format(order.total_amount) }} грн</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <div class="alert alert-info">
+                <h6>📋 Наступні кроки:</h6>
+                <p class="mb-0">
+                    Наш менеджер зв'яжеться з вами для підтвердження замовлення.<br>
+                    Статус замовлення ви можете відстежувати в <a href="/orders" class="alert-link">особистому кабінеті</a>.
+                </p>
+            </div>
+            
+            <div class="d-flex gap-3 justify-content-center mt-4">
+                <a href="/orders" class="btn btn-primary">
+                    <i class="bi bi-box-seam me-2"></i> Мої замовлення
+                </a>
+                <a href="/products" class="btn btn-outline-primary">
+                    <i class="bi bi-cart-plus me-2"></i> Продовжити покупки
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення - RepairHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/">RepairHub Admin</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Головна</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/repairs">Ремонти</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/orders">Замовлення</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">Користувачі</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <main class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Замовлення</h1>
+                    
+                    <div class="btn-group">
+                        <a href="/admin/orders" class="btn btn-outline-primary {% if not selected_status %}active{% endif %}">
+                            Всі
+                        </a>
+                        {% for status in statuses %}
+                        <a href="/admin/orders?status={{ status.value }}" 
+                           class="btn btn-outline-primary {% if selected_status == status.value %}active{% endif %}">
+                            {{ status.value }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Користувач</th>
+                                <th>Дата</th>
+                                <th>Сума</th>
+                                <th>Статус</th>
+                                <th>Клієнт</th>
+                                <th>Телефон</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td>{{ order.total_amount }} грн</td>
+                                <td>
+                                    {% if order.status.value == "Новий" %}
+                                        <span class="badge bg-warning">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "В обробці" %}
+                                        <span class="badge bg-info">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "Підтверджено" %}
+                                        <span class="badge bg-primary">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "Готується" %}
+                                        <span class="badge bg-secondary">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "Готовий" %}
+                                        <span class="badge bg-success">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "В дорозі" %}
+                                        <span class="badge bg-primary">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "Доставлено" %}
+                                        <span class="badge bg-success">{{ order.status.value }}</span>
+                                    {% elif order.status.value == "Скасовано" %}
+                                        <span class="badge bg-danger">{{ order.status.value }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ order.status.value }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>{{ order.customer_phone }}</td>
+                                <td>
+                                    <a href="/admin/order/{{ order.id }}" class="btn btn-sm btn-outline-primary">
+                                        Деталі
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <h4 class="alert-heading">Замовлення відсутні</h4>
+                    <p>Наразі немає замовлень{% if selected_status %} зі статусом "{{ selected_status }}"{% endif %}.</p>
+                </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

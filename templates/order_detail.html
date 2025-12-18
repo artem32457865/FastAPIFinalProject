@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення #{{ order.id }} - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-white bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">RepairHub</a>
+            <div class="ms-auto">
+                <a href="/orders" class="btn btn-link">← Мої замовлення</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Замовлення #{{ order.id }}</h1>
+            <span class="badge fs-6 
+                {% if order.status.value == 'Новий' %}bg-warning
+                {% elif order.status.value == 'В обробці' %}bg-info
+                {% elif order.status.value == 'Підтверджено' %}bg-primary
+                {% elif order.status.value == 'Готується' %}bg-secondary
+                {% elif order.status.value == 'Готовий' %}bg-success
+                {% elif order.status.value == 'В дорозі' %}bg-primary
+                {% elif order.status.value == 'Доставлено' %}bg-success
+                {% elif order.status.value == 'Скасовано' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ order.status.value }}
+            </span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Інформація про замовлення</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Дані клієнта:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Ім'я:</strong> {{ order.customer_name }}</li>
+                                    <li><strong>Телефон:</strong> {{ order.customer_phone }}</li>
+                                    <li><strong>Email:</strong> {{ order.customer_email }}</li>
+                                    <li><strong>Адреса:</strong> {{ order.shipping_address }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Деталі замовлення:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Номер:</strong> #{{ order.id }}</li>
+                                    <li><strong>Дата створення:</strong> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</li>
+                                    <li><strong>Останнє оновлення:</strong> {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}</li>
+                                    <li><strong>Загальна сума:</strong> {{ "%.2f"|format(order.total_amount) }} грн</li>
+                                    {% if order.notes %}
+                                    <li><strong>Примітки:</strong> {{ order.notes }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Товари в замовленні</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Кількість</th>
+                                    <th>Ціна</th>
+                                    <th>Сума</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ "%.2f"|format(item.price) }} грн</td>
+                                    <td>{{ "%.2f"|format(item.price * item.quantity) }} грн</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="3">Загальна сума:</th>
+                                    <th>{{ "%.2f"|format(order.total_amount) }} грн</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Статус доставки</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                {% if order.status.value == 'Новий' %}
+                                <i class="bi bi-clock fs-3 text-warning"></i>
+                                {% elif order.status.value == 'В обробці' %}
+                                <i class="bi bi-gear fs-3 text-info"></i>
+                                {% elif order.status.value == 'Підтверджено' %}
+                                <i class="bi bi-check-circle fs-3 text-primary"></i>
+                                {% elif order.status.value == 'Готується' %}
+                                <i class="bi bi-box-seam fs-3 text-secondary"></i>
+                                {% elif order.status.value == 'Готовий' %}
+                                <i class="bi bi-check-circle fs-3 text-success"></i>
+                                {% elif order.status.value == 'В дорозі' %}
+                                <i class="bi bi-truck fs-3 text-primary"></i>
+                                {% elif order.status.value == 'Доставлено' %}
+                                <i class="bi bi-house-check fs-3 text-success"></i>
+                                {% elif order.status.value == 'Скасовано' %}
+                                <i class="bi bi-x-circle fs-3 text-danger"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ order.status.value }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    {% if order.status.value == 'Новий' %}
+                                    Замовлення прийнято в обробку
+                                    {% elif order.status.value == 'В обробці' %}
+                                    Менеджер перевіряє замовлення
+                                    {% elif order.status.value == 'Підтверджено' %}
+                                    Замовлення підтверджено
+                                    {% elif order.status.value == 'Готується' %}
+                                    Товар готується до відправки
+                                    {% elif order.status.value == 'Готовий' %}
+                                    Замовлення готове до відправки
+                                    {% elif order.status.value == 'В дорозі' %}
+                                    Кур'єр везе ваше замовлення
+                                    {% elif order.status.value == 'Доставлено' %}
+                                    Замовлення доставлено
+                                    {% elif order.status.value == 'Скасовано' %}
+                                    Замовлення скасовано
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {% if order.status.value not in ['Доставлено', 'Скасовано'] %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Очікуйте дзвінка менеджера для підтвердження деталей доставки.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Дії</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="tel:+380441234567" class="btn btn-outline-primary">
+                                <i class="bi bi-telephone"></i> Зателефонувати в підтримку
+                            </a>
+                            <a href="mailto:support@repairhub.com" class="btn btn-outline-secondary">
+                                <i class="bi bi-envelope"></i> Написати на email
+                            </a>
+                            <a href="/products" class="btn btn-outline-success">
+                                <i class="bi bi-cart-plus"></i> Продовжити покупки
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
