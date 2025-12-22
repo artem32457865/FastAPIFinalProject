@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.models import RepairRequest, User
+from models.models import RepairRequest, User, Notification
 from routes.auth import get_current_user, require_admin
 from settings import get_db
 from datetime import datetime
@@ -40,14 +40,134 @@ async def dashboard_page(
     if not user_data:
         return RedirectResponse(url="/auth/login", status_code=303)
     
+    # Получить непрочитанные уведомления
+    stmt = select(Notification)\
+        .where(
+            (Notification.user_id == user_data["id"]) &
+            (Notification.is_read == False)
+        )\
+        .order_by(Notification.created_at.desc())\
+        .limit(5)
+    
+    result = await db.execute(stmt)
+    unread_notifications = result.scalars().all()
+    
+    # Получить статистику
+    repairs_stmt = select(RepairRequest).where(RepairRequest.user_id == user_data["id"])
+    repairs_result = await db.execute(repairs_stmt)
+    user_repairs = repairs_result.scalars().all()
+    
     return templates.TemplateResponse(
         "account/dashboard.html",
         {
             "request": request,
             "user": user_data,
+            "unread_notifications": unread_notifications,
+            "repairs_count": len(user_repairs),
             "now": datetime.now()
         }
     )
+
+
+# ==================== УВЕДОМЛЕНИЯ ====================
+@router.get("/notifications", response_class=HTMLResponse)
+async def user_notifications(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Страница уведомлений пользователя"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    # Получить все уведомления
+    stmt = select(Notification)\
+        .where(Notification.user_id == user_data["id"])\
+        .order_by(Notification.created_at.desc())
+    
+    result = await db.execute(stmt)
+    notifications = result.scalars().all()
+    
+    # Отметить все как прочитанные
+    for notification in notifications:
+        if not notification.is_read:
+            notification.is_read = True
+    
+    await db.commit()
+    
+    return templates.TemplateResponse(
+        "account/notifications.html",
+        {
+            "request": request,
+            "user": user_data,
+            "notifications": notifications,
+            "now": datetime.now()
+        }
+    )
+
+
+@router.post("/notifications/{notification_id}/mark-read")
+async def mark_notification_read(
+    notification_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Пометить уведомление как прочитанное"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Не авторизовано")
+    
+    # Найти уведомление
+    stmt = select(Notification).where(
+        (Notification.id == notification_id) &
+        (Notification.user_id == user_data["id"])
+    )
+    
+    result = await db.execute(stmt)
+    notification = result.scalar_one_or_none()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="Уведомление не найдено")
+    
+    # Отметить как прочитанное
+    notification.is_read = True
+    await db.commit()
+    
+    return {"status": "success", "message": "Уведомление отмечено как прочитанное"}
+
+
+@router.post("/notifications/mark-all-read")
+async def mark_all_notifications_read(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Пометить все уведомления как прочитанные"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Не авторизовано")
+    
+    # Найти все непрочитанные уведомления
+    stmt = select(Notification).where(
+        (Notification.user_id == user_data["id"]) &
+        (Notification.is_read == False)
+    )
+    
+    result = await db.execute(stmt)
+    notifications = result.scalars().all()
+    
+    # Отметить все как прочитанные
+    for notification in notifications:
+        notification.is_read = True
+    
+    await db.commit()
+    
+    return {"status": "success", "message": f"Все уведомления ({len(notifications)}) отмечены как прочитанные"}
 
 
 # ==================== API ДЛЯ JSON ====================

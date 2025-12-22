@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from werkzeug.security import generate_password_hash
 from models.models import User, Product, ProductCategory
-from settings import async_session
+from settings import async_session, async_engine, Base
 
 
 async def insert_data():

@@ -51,6 +51,13 @@ class User(Base):
         lazy="selectin",
     )
 
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        foreign_keys="Notification.user_id",
+        lazy="selectin",
+    )
+
     def __str__(self):
         return f"<User> з {self.id} та {self.username}"
 
@@ -94,6 +101,13 @@ class RepairRequest(Base):
         "AdminMessage",
         back_populates="repair_request",
         foreign_keys="AdminMessage.request_id",
+        lazy="selectin",
+    )
+
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="repair_request",
+        foreign_keys="Notification.repair_request_id",
         lazy="selectin",
     )
 
@@ -219,6 +233,12 @@ class Order(Base):
         back_populates="order",
         cascade="all, delete-orphan"
     )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="order",
+        foreign_keys="Notification.order_id",
+        lazy="selectin",
+    )
 
     def __str__(self):
         return f"<Order #{self.id} - {self.status}>"
@@ -238,3 +258,64 @@ class OrderItem(Base):
 
     def __str__(self):
         return f"<OrderItem {self.product_id} x{self.quantity}>"
+
+
+class NotificationType(str, Enum):
+    REPAIR_UPDATE = "Оновлення по ремонту"
+    ORDER_UPDATE = "Оновлення замовлення"
+    MESSAGE = "Повідомлення"
+    SYSTEM = "Системне"
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    notification_type: Mapped[NotificationType] = mapped_column(
+        SQLEnum(NotificationType, name="notification_type"),
+        default=NotificationType.MESSAGE.value
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # Додаткові поля для зв'язку з іншими моделями
+    repair_request_id: Mapped[int] = mapped_column(
+        ForeignKey("repair_requests.id"), nullable=True
+    )
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id"), nullable=True
+    )
+    admin_message_id: Mapped[int] = mapped_column(
+        ForeignKey("admin_messages.id"), nullable=True
+    )
+    
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=func.now())
+
+    # зв'язки
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="notifications",
+        foreign_keys=[user_id],
+    )
+    
+    repair_request: Mapped["RepairRequest"] = relationship(
+        "RepairRequest",
+        back_populates="notifications",
+        foreign_keys=[repair_request_id],
+    )
+    
+    order: Mapped["Order"] = relationship(
+        "Order",
+        back_populates="notifications",
+        foreign_keys=[order_id],
+    )
+    
+    admin_message: Mapped["AdminMessage"] = relationship(
+        "AdminMessage",
+        foreign_keys=[admin_message_id],
+    )
+
+    def __str__(self):
+        return f"<Notification> для {self.user_id}: {self.title}"

@@ -98,6 +98,12 @@
           <a href="/auth/login" class="btn btn-outline-secondary">Увійти</a>
           <a href="/auth/register" class="btn btn-primary">Реєстрація</a>
           {% endif %}
+          <a href="/account/notifications" class="btn btn-outline-info position-relative">
+          <i class="bi bi-bell"></i> Уведомления
+          {% if unread_notifications and unread_notifications|length > 0 %}
+          <span class="cart-count">{{ unread_notifications|length }}</span>
+          {% endif %}
+          </a>
         </div>
       </div>
     </nav>

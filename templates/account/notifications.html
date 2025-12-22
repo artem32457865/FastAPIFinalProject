@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уведомления - RepairHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .notification-item {
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .notification-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .notification-unread {
+            border-left-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+        .notification-repair {
+            border-left-color: #198754;
+        }
+        .notification-order {
+            border-left-color: #6f42c1;
+        }
+        .notification-system {
+            border-left-color: #fd7e14;
+        }
+        .notification-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .notification-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-white bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center" 
+                     style="width:40px;height:40px;font-weight:700;">R</div>
+                <div>
+                    <div class="fw-bold">RepairHub</div>
+                    <div class="text-muted small">Уведомления</div>
+                </div>
+            </a>
+            
+            <div class="ms-auto d-flex gap-3">
+                <a href="/" class="btn btn-link">Головна</a>
+                <a href="/account/dashboard" class="btn btn-link">Кабінет</a>
+                <a href="/products" class="btn btn-link">Магазин</a>
+                <a href="/auth/logout" class="btn btn-outline-danger">Вийти</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>🔔 Уведомления</h1>
+            <div>
+                <form method="post" action="/account/notifications/mark-all-read" class="d-inline">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-check-all"></i> Відмітити все як прочитане
+                    </button>
+                </form>
+                <a href="/account/dashboard" class="btn btn-outline-primary btn-sm ms-2">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+            </div>
+        </div>
+        
+        {% if notifications %}
+            <div class="card">
+                <div class="card-body p-0">
+                    {% for notification in notifications %}
+                    <div class="notification-item p-4 border-bottom 
+                                {% if not notification.is_read %}notification-unread{% endif %}
+                                {% if notification.notification_type.value == 'Оновлення по ремонту' %}notification-repair
+                                {% elif notification.notification_type.value == 'Оновлення замовлення' %}notification-order
+                                {% elif notification.notification_type.value == 'Системне' %}notification-system{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-1">
+                                    {% if not notification.is_read %}
+                                    <span class="badge bg-primary notification-badge me-2">Нове</span>
+                                    {% endif %}
+                                    {{ notification.title }}
+                                </h5>
+                                <span class="badge bg-light text-dark notification-badge">
+                                    <i class="bi bi-{% if notification.notification_type.value == 'Оновлення по ремонту' %}tools
+                                                  {% elif notification.notification_type.value == 'Оновлення замовлення' %}box-seam
+                                                  {% elif notification.notification_type.value == 'Повідомлення' %}chat-text
+                                                  {% else %}bell{% endif %} me-1"></i>
+                                    {{ notification.notification_type.value }}
+                                </span>
+                            </div>
+                            <small class="notification-date">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </small>
+                        </div>
+                        
+                        <p class="mb-3">{{ notification.message }}</p>
+                        
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                {% if notification.repair_request_id %}
+                                <a href="/account/repairs" class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-tools"></i> Переглянути заявку
+                                </a>
+                                {% endif %}
+                                
+                                {% if notification.order_id %}
+                                <a href="/order/{{ notification.order_id }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-box-seam"></i> Переглянути замовлення
+                                </a>
+                                {% endif %}
+                            </div>
+                            
+                            {% if not notification.is_read %}
+                            <form method="post" action="/account/notifications/{{ notification.id }}/mark-read" class="d-inline">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-check"></i> Відмітити як прочитане
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            {% if notifications|length == 0 %}
+            <div class="text-center py-5">
+                <div class="display-1 text-muted mb-3">📭</div>
+                <h3 class="mb-3">Уведомлень немає</h3>
+                <p class="text-muted">Тут будуть з'являтися сповіщення про ваші заявки та замовлення.</p>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <div class="display-1 text-muted mb-3">📭</div>
+                <h3 class="mb-3">Уведомлень немає</h3>
+                <p class="text-muted">Тут будуть з'являтися сповіщення про ваші заявки та замовлення.</p>
+                <a href="/products" class="btn btn-primary">Перейти до магазину</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Подвал -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <div class="mb-2">
+                <a href="/" class="text-white text-decoration-none me-3">Головна</a>
+                <a href="/products" class="text-white text-decoration-none me-3">Магазин</a>
+                <a href="/account/dashboard" class="btn btn-outline-primary">Кабінет</a>
+            </div>
+            <div class="text-muted small">
+                © {{ now.year if now else 2024 }} RepairHub • Уведомлення
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // AJAX для отметки уведомлений как прочитанных
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обновляем год в подвале
+            const yearElement = document.querySelector('footer .text-muted');
+            if (yearElement && yearElement.textContent.includes('{{ now.year if now else 2024 }}')) {
+                const currentYear = new Date().getFullYear();
+                yearElement.innerHTML = yearElement.innerHTML.replace('{{ now.year if now else 2024 }}', currentYear);
+            }
+            
+            // Обработка форм отметки как прочитанных без перезагрузки
+            document.querySelectorAll('form[action*="/mark-read"]').forEach(form => {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const form = this;
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams(new FormData(form))
+                        });
+                        
+                        if (response.ok) {
+                            // Визуальное обновление
+                            const notificationItem = form.closest('.notification-item');
+                            notificationItem.classList.remove('notification-unread');
+                            notificationItem.querySelector('.badge.bg-primary')?.remove();
+                            
+                            // Обновить кнопку
+                            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Прочитано';
+                            submitBtn.classList.remove('btn-outline-secondary');
+                            submitBtn.classList.add('btn-outline-success');
+                            submitBtn.disabled = true;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+            
+            // Обработка формы отметки всех как прочитанных
+            const markAllForm = document.querySelector('form[action*="/mark-all-read"]');
+            if (markAllForm) {
+                markAllForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const form = this;
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Обробка...';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams(new FormData(form))
+                        });
+                        
+                        if (response.ok) {
+                            // Обновить все уведомления на странице
+                            document.querySelectorAll('.notification-item').forEach(item => {
+                                item.classList.remove('notification-unread');
+                                item.querySelector('.badge.bg-primary')?.remove();
+                                item.querySelector('form[action*="/mark-read"] button')?.remove();
+                            });
+                            
+                            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Успішно';
+                            submitBtn.classList.remove('btn-outline-secondary');
+                            submitBtn.classList.add('btn-outline-success');
+                            
+                            setTimeout(() => {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.classList.remove('btn-outline-success');
+                                submitBtn.classList.add('btn-outline-secondary');
+                                submitBtn.disabled = false;
+                            }, 2000);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

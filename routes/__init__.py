@@ -4,7 +4,7 @@ from .user_account import router as user_account_router
 from .products import router as products_router
 from .admin_panel import router as admin_panel_router
 
-# 添加调试输出
+
 print("Routes imported:")
 print(f"  auth_router: {auth_router}")
 print(f"  frontend_router: {frontend_router}")

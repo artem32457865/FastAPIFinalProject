@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <h5>Середній рейтинг: {{ avg_rating }}/5.0</h5>
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: {{ (avg_rating / 5 * 100)|int }}%;" 
+                        <div class="progress-bar" role="progressbar" style="width: {{ (avg_rating / 5 * 100)|int }}%;"
                              aria-valuenow="{{ avg_rating }}" aria-valuemin="0" aria-valuemax="5">
                             {{ avg_rating }}/5.0
                         </div>
@@ -29,7 +29,7 @@
                         <span>{{ username }}</span>
                         <span>
                             {% for i in range(1, 6) %}
-                                {% if i <= feedback.rating %}
+                                {% if i = feedback.rating %}
                                     ★
                                 {% else %}
                                     ☆

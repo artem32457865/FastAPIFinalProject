@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Замовлення #{{ order.id }} - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark">
@@ -100,6 +101,26 @@
                     </div>
                 </div>
 
+                <!-- Уведомления -->
+                {% if order.notifications %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">📨 Відправлені уведомлення</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for notification in order.notifications %}
+                        <div class="border-start border-3 border-primary ps-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ notification.title }}</strong>
+                                <small class="text-muted">{{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                            </div>
+                            <p class="mb-0">{{ notification.message }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Примітки -->
                 {% if order.notes %}
                 <div class="card mb-4">
@@ -149,8 +170,6 @@
                             <button type="submit" class="btn btn-primary w-100">Оновити статус</button>
                         </form>
 
-                        <hr>
-
                         <!-- Добавление примечания -->
                         <form method="post" action="/admin/order/{{ order.id }}/add-note">
                             <div class="mb-3">
@@ -159,6 +178,22 @@
                                           placeholder="Наприклад: Клієнт просив передзвонити о 18:00"></textarea>
                             </div>
                             <button type="submit" class="btn btn-secondary w-100">Додати примітку</button>
+                        </form>
+
+                        <hr>
+
+                        <!-- Отправка уведомления -->
+                        <form method="post" action="/admin/order/{{ order.id }}/send-notification" class="mt-4">
+                            <div class="mb-3">
+                                <label class="form-label">Надіслати уведомлення клієнту:</label>
+                                <input type="text" name="title" class="form-control mb-2" 
+                                       placeholder="Заголовок" value="Оновлення по замовленню" required>
+                                <textarea name="message" class="form-control" rows="3" 
+                                          placeholder="Текст повідомлення..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="bi bi-bell"></i> Надіслати уведомлення
+                            </button>
                         </form>
 
                         <hr>
@@ -181,7 +216,7 @@
                     </div>
                 </div>
 
-                <!-- История статусов (можно добавить отдельную модель) -->
+                <!-- История статусов -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">Історія замовлення</h5>
@@ -195,6 +230,10 @@
                             <li>
                                 <small class="text-muted">Останнє оновлення:</small><br>
                                 {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}
+                            </li>
+                            <li>
+                                <small class="text-muted">Уведомлень відправлено:</small><br>
+                                {{ order.notifications|length }}
                             </li>
                         </ul>
                     </div>
@@ -212,7 +251,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Подтверждение перед сменой статуса на "Скасовано"
         document.addEventListener('DOMContentLoaded', function() {
             const statusSelect = document.querySelector('select[name="status"]');
             const statusForm = document.querySelector('form[action*="update-status"]');
@@ -243,6 +281,18 @@
                     });
                 });
             });
+            
+            // Подтверждение отправки уведомления
+            const notificationForm = document.querySelector('form[action*="send-notification"]');
+            if (notificationForm) {
+                notificationForm.addEventListener('submit', function(e) {
+                    const message = this.querySelector('textarea[name="message"]').value;
+                    if (!message.trim()) {
+                        e.preventDefault();
+                        alert('Будь ласка, введіть текст повідомлення');
+                    }
+                });
+            }
         });
     </script>
 </body>
