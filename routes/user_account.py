@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.models import RepairRequest, User, Notification
+from models.models import RepairRequest, User, Notification, Order, OrderStatus
 from routes.auth import get_current_user, require_admin
 from settings import get_db
 from datetime import datetime
@@ -57,6 +57,11 @@ async def dashboard_page(
     repairs_result = await db.execute(repairs_stmt)
     user_repairs = repairs_result.scalars().all()
     
+    # Получить количество заказов
+    orders_stmt = select(Order).where(Order.user_id == user_data["id"])
+    orders_result = await db.execute(orders_stmt)
+    user_orders = orders_result.scalars().all()
+    
     return templates.TemplateResponse(
         "account/dashboard.html",
         {
@@ -64,6 +69,7 @@ async def dashboard_page(
             "user": user_data,
             "unread_notifications": unread_notifications,
             "repairs_count": len(user_repairs),
+            "orders_count": len(user_orders),
             "now": datetime.now()
         }
     )
@@ -257,7 +263,8 @@ async def create_repair_request(
     image_url = None
     
     if image:
-        image_url = await generate_file_url(image.filename)
+        from tools.file_upload import generate_repair_file_url
+        image_url = await generate_repair_file_url(image.filename)
         bgt.add_task(save_file, image, image_url)
 
     new_req = RepairRequest(
@@ -275,7 +282,7 @@ async def create_repair_request(
     return RedirectResponse(url="/account/repairs", status_code=303)
 
 
-@router.get("/repair/{repair_id}")
+@router.get("/repair/{repair_id}", response_class=HTMLResponse)
 async def get_repair_request(
     repair_id: int, 
     request: Request, 
@@ -286,7 +293,7 @@ async def get_repair_request(
     user_data = await get_current_user_from_cookies(request, db)
     
     if not user_data:
-        raise HTTPException(status_code=401, detail="Не авторизовано")
+        return RedirectResponse(url="/auth/login", status_code=303)
     
     user_id = user_data["id"]
     
@@ -300,7 +307,15 @@ async def get_repair_request(
     if not repair:
         raise HTTPException(status_code=404, detail="Заявка не знайдена")
     
-    return repair
+    return templates.TemplateResponse(
+        "account/repair_detail.html",
+        {
+            "request": request,
+            "user": user_data,
+            "repair": repair,
+            "now": datetime.now()
+        }
+    )
 
 
 @router.put("/repair/{repair_id}")
@@ -333,3 +348,108 @@ async def delete_repair_request(
         raise HTTPException(status_code=401, detail="Не авторизовано")
     
     return {"message": f"Delete repair request {repair_id} endpoint (TODO)"}
+
+
+# ==================== ЗАКАЗЫ ====================
+@router.get("/orders", response_class=HTMLResponse)
+async def user_orders_page(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Страница с заказами пользователя"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    # Получаем заказы пользователя
+    stmt = select(Order).where(Order.user_id == int(user_data["id"]))
+    result = await db.execute(stmt)
+    orders = result.scalars().all()
+    
+    return templates.TemplateResponse(
+        "account/orders.html",  # Create this template
+        {
+            "request": request,
+            "user": user_data,
+            "orders": orders,
+            "now": datetime.now()
+        }
+    )
+
+
+@router.delete("/order/{order_id}")
+async def delete_order(
+    order_id: int, 
+    request: Request, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Удаление заказа"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Не авторизовано")
+    
+    # Проверяем, что заказ принадлежит пользователю и имеет статус, который можно отменить
+    stmt = select(Order).where(
+        (Order.id == order_id) &
+        (Order.user_id == user_data["id"]) &
+        (Order.status.in_([OrderStatus.NEW, OrderStatus.PROCESSING]))  # Только новые и в обработке можно отменить
+    )
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден или его нельзя отменить")
+    
+    # Меняем статус на отменённый вместо физического удаления
+    order.status = OrderStatus.CANCELLED
+    await db.commit()
+    
+    return {"message": f"Заказ {order_id} отменён"}
+
+
+@router.get("/order/{order_id}")
+async def get_order(
+    order_id: int, 
+    request: Request, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Просмотр конкретного заказа"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Не авторизовано")
+    
+    user_id = user_data["id"]
+    
+    stmt = select(Order).where(
+        (Order.id == order_id) & 
+        (Order.user_id == int(user_id))
+    )
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    return order
+
+
+@router.put("/order/{order_id}")
+async def update_order(
+    order_id: int, 
+    request: Request, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Обновление заказа"""
+    from routes.auth import get_current_user_from_cookies
+    user_data = await get_current_user_from_cookies(request, db)
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Не авторизовано")
+    
+    return {"message": f"Update order {order_id} endpoint (TODO)"}

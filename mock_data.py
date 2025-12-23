@@ -39,6 +39,7 @@ async def insert_data():
                 price=19999.99,
                 category=ProductCategory.VACUUM_CLEANER,
                 stock_quantity=10,
+                image_url="/static/images/Dyson_V11.png",
             ),
             Product(
                 name="Холодильник Samsung RB38",
@@ -46,6 +47,7 @@ async def insert_data():
                 price=25999.99,
                 category=ProductCategory.REFRIGERATOR,
                 stock_quantity=5,
+                image_url="/static/images/Samsung_RB38.png",
             ),
             Product(
                 name="Ноутбук Lenovo IdeaPad",
@@ -53,6 +55,7 @@ async def insert_data():
                 price=21999.99,
                 category=ProductCategory.COMPUTER,
                 stock_quantity=7,
+                image_url="/static/images/Lenovo_IdeaPad.png",
             ),
             Product(
                 name="Смартфон iPhone 13",
@@ -60,6 +63,7 @@ async def insert_data():
                 price=28999.99,
                 category=ProductCategory.SMARTPHONE,
                 stock_quantity=3,
+                image_url="/static/images/iPhone_13.png",
             ),
             Product(
                 name="Телевізор Samsung 50\"",
@@ -67,56 +71,57 @@ async def insert_data():
                 price=19999.99,
                 category=ProductCategory.TV,
                 stock_quantity=4,
+                image_url="/static/images/Samsung_TV50.png"
             ),
             
-             Product(
-        name="Ноутбук ASUS VivoBook",
-        description="15.6 дюймів, AMD Ryzen 5, 16GB RAM, 512GB SSD",
-        price=24999.99,
-        category=ProductCategory.COMPUTER,
-        stock_quantity=8,
-        image_url="/static/images/laptop2.jpg"
-    ),
-    Product(
-        name="Смартфон Samsung Galaxy S23",
-        description="256GB, чорний, 120Hz дисплей",
-        price=32999.99,
-        category=ProductCategory.SMARTPHONE,
-        stock_quantity=6,
-        image_url="/static/images/galaxy.jpg"
-    ),
-    Product(
-        name="Телевізор LG 55\" OLED",
-        description="4K OLED, Smart TV, Google TV",
-        price=34999.99,
-        category=ProductCategory.TV,
-        stock_quantity=3,
-        image_url="/static/images/tv2.jpg"
-    ),
-    Product(
-        name="Пральна машина Samsung",
-        description="Завантаження 8 кг, Eco Bubble, Digital Inverter",
-        price=18999.99,
-        category=ProductCategory.KITCHEN,
-        stock_quantity=7,
-        image_url="/static/images/washer.jpg"
-    ),
-    Product(
-        name="Мікрохвильова піч Samsung",
-        description="25 літрів, гриль, конвекція",
-        price=5999.99,
-        category=ProductCategory.KITCHEN,
-        stock_quantity=15,
-        image_url="/static/images/microwave.jpg"
-    ),
-    Product(
-        name="Пилосос Philips PowerPro",
-        description="Потужність 650W, мішок для пилу",
-        price=3999.99,
-        category=ProductCategory.VACUUM_CLEANER,
-        stock_quantity=12,
-        image_url="/static/images/vacuum2.jpg"
-    ),
+            Product(
+                name="Ноутбук ASUS VivoBook",
+                description="15.6 дюймів, AMD Ryzen 5, 16GB RAM, 512GB SSD",
+                price=24999.99,
+                category=ProductCategory.COMPUTER,
+                stock_quantity=8,
+                image_url="/static/images/ASUS_VivoBook.png"
+            ),
+            Product(
+                name="Смартфон Samsung Galaxy S23",
+                description="256GB, чорний, 120Hz дисплей",
+                price=32999.99,
+                category=ProductCategory.SMARTPHONE,
+                stock_quantity=6,
+                image_url="/static/images/Samsung_Galaxy_S23.png"
+            ),
+            Product(
+                name="Телевізор LG 55\" OLED",
+                description="4K OLED, Smart TV, Google TV",
+                price=34999.99,
+                category=ProductCategory.TV,
+                stock_quantity=3,
+                image_url="/static/images/LG_OLED55.png"
+            ),
+            Product(
+                name="Пральна машина Samsung",
+                description="Завантаження 8 кг, Eco Bubble, Digital Inverter",
+                price=18999.99,
+                category=ProductCategory.KITCHEN,
+                stock_quantity=7,
+                image_url="/static/images/washing_machine.jpg"
+            ),
+            Product(
+                name="Мікрохвильова піч Samsung",
+                description="25 літрів, гриль, конвекція",
+                price=5999.99,
+                category=ProductCategory.KITCHEN,
+                stock_quantity=15,
+                image_url="/static/images/microwave.jpg"
+            ),
+            Product(
+                name="Пилосос Philips PowerPro",
+                description="Потужність 650W, мішок для пилу",
+                price=3999.99,
+                category=ProductCategory.VACUUM_CLEANER,
+                stock_quantity=12,
+                image_url="/static/images/Philips_PowerPro.png"
+            ),
         ]
         
         session.add_all(products)
