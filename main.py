@@ -18,9 +18,10 @@ templates = Jinja2Templates(directory="templates")
 app.include_router(admin_panel_router, tags=["admin"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(user_account_router, prefix="/account", tags=["account"])
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(products_router, prefix="", tags=["products"]) 
 app.include_router(frontend_router, prefix="", tags=["frontend"])  
-app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # Глобальный обработчик ошибок 404
 @app.exception_handler(404)
